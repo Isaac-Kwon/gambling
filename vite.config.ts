@@ -33,7 +33,12 @@ export default defineConfig({
   build: {
     target: 'es2020',
     manifest: true, // later bundle-purity check walks dist/.vite/manifest.json from the root entry
+    sourcemap: false,
     rollupOptions: {
+      output: {
+        // Shared chunks get opaque names so module names never leak into dist (entries keep theirs).
+        chunkFileNames: 'assets/c-[hash].js',
+      },
       input: {
         main: r('./index.html'),
         understanding: r('./understanding/index.html'),

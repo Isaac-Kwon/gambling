@@ -1,8 +1,6 @@
-import ko from '@i18n/gambling.ko.json';
-import en from '@i18n/gambling.en.json';
-import it from '@i18n/gambling.it.json';
-import { makeT, type Dictionaries } from './i18n';
+import { makeT, mergeDictionaries, type Dict } from './i18n';
 
-// Per-page modules keep each page's bundle free of the other page's strings.
-export const dictionaries: Dictionaries = { ko, en, it };
+// Separate glob per page keeps each page's bundle free of the other page's strings.
+export const files = import.meta.glob<Dict>('../i18n/gambling/*.json', { eager: true, import: 'default' });
+export const dictionaries = mergeDictionaries(files);
 export const t = makeT(dictionaries);

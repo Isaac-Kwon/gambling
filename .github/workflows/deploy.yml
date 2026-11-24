@@ -31,7 +31,9 @@ jobs:
       - run: npm run build
         env:
           BASE_PATH: /gambling/
-      # - run: npm run check:bundle   # Phase 2
+      - run: npm run check:bundle
+      - run: npx tsx scripts/i18n-sync.ts --check
+      - run: rm -rf dist/.vite   # build manifest is only for check:bundle; do not publish it
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

@@ -2,7 +2,7 @@
 
 > 이 문서는 프로젝트의 **단일 기준 문서(Source of Truth)** 다. 어느 세션에서든 수정할 수 있다.
 > 수정 규칙: (1) 결정이 바뀌면 해당 섹션을 직접 고친다. (2) 맨 아래 **변경 이력**에 한 줄을 추가한다. (3) 미결 사항이 결정되면 §8에서 §7로 옮긴다.
-> 구현용 프롬프트는 `claude/claude-code-prompt.md`에 있다. 이 문서를 바꾸면 그 프롬프트도 함께 맞춘다.
+> 구현용 프롬프트는 `docs/BASE_PROMPT.md`에 있다. 설계 문서는 `docs/ARCHITECTURE.md`, 결정 로그는 `docs/DECISIONS.md`에 있다. 이 문서를 바꾸면 그 문서들도 함께 맞춘다.
 
 ---
 
@@ -14,8 +14,9 @@
 - **휴대폰에 설치되는 카지노 앱이라는 형태 자체도 체험의 일부다** (§6.1). 실제 도박은 대부분 휴대폰에서 일어난다.
 
 ## 2. 핵심 구조: 한 저장소, 두 페이지 ✅ 확정
+- 배포 주소: https://isaack.dev/gambling/ (GitHub Pages, 저장소 Isaac-Kwon/gambling). 게임 로비가 사이트 루트(`/index.html`)이고, 해석 페이지는 `/understanding/`이다. 루트 리다이렉트는 없다.
 
-### 2.1 `/gambling/` — 순수 게임
+### 2.1 `/` (게임 로비, 사이트 루트) — 순수 게임
 - **게임에만 집중한다. 교육용이라는 느낌을 주지 않는다.**
 - 경고 문구, 교육 안내, 퀴즈, 해설, "이건 실험입니다" 같은 표시를 넣지 않는다.
 - **실제 상업용 모바일 카지노·소셜 카지노 앱 수준으로 화려하게 만든다** (§4.7).
@@ -126,6 +127,7 @@
 | 진행감 | 레벨·XP 바, 보너스 게이지 | 멈출 이유 제거 |
 
 - 에셋은 직접 만들거나 라이선스가 명확한 것만 쓴다. 사운드는 Web Audio 합성을 우선한다.
+- **슬롯 변형 (2026-11-25):** 적중률이 다른 두 변형을 구현한다. a는 적중률 약 40.6%, b는 약 30.0%이고, RTP는 둘 다 약 94%다. 숨겨진 `?sv=b`로 고른다. 최종 선택은 실제 휴대폰 비교 후 정한다 (§8).
 
 #### 4.7.2 자극 로깅
 - 연출이 발생할 때마다 `{type, ms, k}`를 그 판의 순손익과 함께 기록한다.
@@ -163,9 +165,10 @@
 - 구현 전에 숫자를 한 번 더 교차 확인하고, understanding에 출처를 표기한다.
 
 #### 4.8.2 gambling에서의 구현 (가상 머신)
-- 실제 제품명 "바다이야기"와 그 그래픽·캐릭터를 쓰지 않는다. **가상의 해양 테마 아케이드 머신**으로 만든다(이름 예: "심해전설", "딥블루 골드"). 로비에 '아케이드관' 섹션을 두고 2000년대 성인 오락실 캐비닛 느낌의 프레임을 씌운다.
+- 실제 제품명 "바다이야기"와 그 그래픽·캐릭터를 쓰지 않는다. **가상의 해양 테마 아케이드 머신**으로 만든다. 이름은 "심해전설 / ABYSS LEGEND"로 확정했다(2026-11-25). 로비에 '아케이드관' 섹션을 두고 2000년대 성인 오락실 캐비닛 느낌의 프레임을 씌운다.
 - **예시:** 결과 엔진이 "보너스 시퀀스"를 뽑으면 화면이 어두워지고 대형 해양 생물(고래·상어·대왕조개 등, 직접 디자인)이 지나간다. 그 다음 몇 판 뒤부터 당첨이 연속으로 나온다.
 - **메모리 연타:** 보너스 총액이 여러 판에 나눠 쌓였다가 연속으로 풀려나온다. 그 사이 플레이어가 무엇을 누르든 결과는 바뀌지 않는다.
+- **잔여 큐 지급:** 아직 풀리지 않은 보너스 큐는 세션 종료(CASH OUT) 때, 또는 큐가 남은 상태에서 파산 직전에 한꺼번에 지급한다.
 - **상품권 연출:** 큰 당첨은 크레딧 대신 "상품권" 종이 티켓이 출력되는 애니메이션으로 보여준다. 화폐 추상화의 한국적 사례다.
 - **정직성 원칙과의 관계:** 결과는 여전히 정직한 난수로 정한다. 보너스 시퀀스 발생 여부와 총액은 **트리거 시점에 RNG가 정하고**, 이후 판들은 그것을 풀어내는 연출이다. 전체 RTP는 설계값으로 고정하고 CI에서 검증한다. 이 게임은 "결과가 미리 정해지고 그 뒤의 플레이는 연극"이라는 구조 자체를 투명하게 재현한다.
 - 로그: `dec.bonusSeqId`, 시퀀스 결정 시점, 예시 표시 시점, 풀려난 판 목록, 예시 뒤 플레이어가 추가로 진행한 판 수와 베팅액.
@@ -192,15 +195,15 @@
 
 ## 6. 기술 스택 / 저장소 구조
 - Vite 멀티 페이지 + TypeScript + Vitest, Playwright(모바일 E2E). GitHub Actions → Pages.
-- 이펙트: PixiJS v8 (기본값, 미결) + CSS 글로우. 사운드: Web Audio 합성. 차트: uPlot.
+- 이펙트: PixiJS v8 + CSS 글로우. Pixi는 장식 레이어(파티클, 광선, 글로우)만 그리며, "탭해서 시작" 게이트 뒤에 지연 로드한다. 릴·카드·보드·텍스트는 DOM/SVG로 그린다. 사운드: Web Audio 합성. 차트: uPlot.
 - i18n: ko / en / it.
 - 서버 없음, 외부 요청 없음, 분석 도구 없음.
 - `/shared/`: rng, schema, logger, handoff, 규칙 엔진(`/shared/rules/`, 순수 함수). understanding의 시뮬레이터가 같은 규칙 엔진을 재사용한다.
-- CI: RTP 검증(10⁶ 라운드, ±0.3%p), gambling 번들과 매니페스트 금지어 검사, flashGuard 테스트, fx on/off 결과 일치 테스트, 모바일 E2E.
+- CI: RTP 검증(정확 계산 + 몬테카를로, 결과가 이론값에서 표준오차 4배 이내. 10⁶ 라운드 ±0.3%p는 슬롯 검증에 통계적으로 부족해 폐기), gambling 번들과 매니페스트 금지어 검사, flashGuard 테스트, fx on/off 결과 일치 테스트, 모바일 E2E.
 
 ### 6.1 PWA ✅ 확정
 - `vite-plugin-pwa`(Workbox generateSW).
-- **매니페스트 1개, 스코프는 사이트 전체**, `start_url = /gambling/`. 이름과 설명은 가상 카지노 브랜드로 하고, 교육용 단어를 넣지 않는다(금지어 검사 대상).
+- **매니페스트 1개.** `start_url`과 `scope`는 모두 사이트 base(https://isaack.dev/gambling/, 게임 로비 `/index.html`)로 한다. 이름은 "오로벨 카지노 / OROBELLE CASINO"로 하고, 설명도 가상 카지노 브랜드로 하며 교육용 단어를 넣지 않는다(금지어 검사 대상).
 - `display: fullscreen` (`display_override: fullscreen → standalone`). 휴대폰 상태바 시계까지 숨겨서 시간 왜곡을 재현한다. 실제 표시 모드를 로그에 남긴다.
 - 세로 고정(기본값, 미결). 어두운 테마 색. 코드로 그린 SVG에서 아이콘(192, 512, maskable, apple-touch)을 생성한다.
 - iOS: apple 메타 태그, `viewport-fit=cover`, safe-area.
@@ -224,23 +227,22 @@
 - 테스트: Playwright 모바일 에뮬레이션(iPhone 13, Pixel 7)으로 라운드 → 정산 → understanding E2E. 320px과 가로 모드 확인.
 
 ```
-/index.html                     루트 → /gambling/ 리다이렉트 (기본값, 미결)
-/gambling/index.html            로비
+/index.html                     게임 로비 (사이트 루트, 리다이렉트 없음)
 /gambling/src/  main.ts lobby.ts wallet.ts cashout.ts ui/*
 /gambling/fx/   particles.ts glow.css shake.ts countup.ts tiers.ts anticipation.ts sfx.ts haptics.ts flashGuard.ts
-/gambling/games/  slot/ roulette/ blackjack/ crash/ (이후 videopoker/ baccarat/ mines/ dice/ hilo/ gacha/ lottery/)
+/gambling/games/  slot/ roulette/ blackjack/ crash/ ocean/ (이후 videopoker/ baccarat/ mines/ dice/ hilo/ gacha/ lottery/)
 /understanding/index.html
 /understanding/src/  main.ts intro.ts debrief.ts stimulus.ts replayPlain.ts strategyCheck.ts sim.ts quiz.ts help.ts
 /shared/  rng.ts schema.ts logger.ts handoff.ts
-/shared/rules/  slot.ts roulette.ts blackjack.ts crash.ts ...
+/shared/rules/  slot.ts roulette.ts blackjack.ts crash.ts ocean.ts ...
 /public/icons/  icon.svg → 생성된 PNG들
 /i18n/  ko / en / it
 /scripts/  rtp-check.ts check-gambling-bundle.ts gen-icons.ts
-/docs/  CONTEXT.md DECISIONS.md
+/docs/  CONTEXT.md DECISIONS.md ARCHITECTURE.md BASE_PROMPT.md
 ```
 
 ## 7. 확정된 결정 / 윤리 안전장치
-- ✅ 한 저장소, 두 페이지(`/gambling/`, `/understanding/`).
+- ✅ 한 저장소, 두 페이지(`/` 게임 로비, `/understanding/`).
 - ✅ gambling은 교육 요소 없이 게임에만 집중한다. 해석, 공개, 도움 연락처(1336), 퀴즈는 understanding에 둔다.
 - ✅ 연결 방식 (b): 크레딧 소진 또는 CASH OUT → 정산 화면 → understanding.
 - ✅ 다중 게임 로비. 전략이 통한다고 알려진 게임도 포함한다. A 부류는 실제 확률 구조로 구현한다.
@@ -250,15 +252,16 @@
 - ✅ **PWA**: 사이트 전체 스코프, 전체화면 표시, 완전 오프라인, 다음 실행 시 업데이트. 푸시·배지·백그라운드 동기화 금지. understanding에 앱 삭제 안내.
 - ✅ **모바일 우선 설계**: 세로 화면 기준, 엄지 영역 조작, 터치 제스처, 성능 예산, 모바일 E2E.
 - ✅ **바다이야기 케이스 포함** (§4.8): gambling에는 가상 해양 아케이드 머신으로 예시·메모리 연타·상품권 연출을 재현하고, understanding에 출처를 붙인 사건 해설을 둔다. 실제 제품명과 그래픽은 쓰지 않는다.
+- ✅ **MVP 게임 범위:** 로비 + 슬롯(C) + 룰렛(B) + 블랙잭(A) + 크래시(B) + 해양 아케이드 슬롯(D). 해양 아케이드 슬롯은 일반 슬롯의 릴·이펙트 엔진을 재사용한다.
+- ✅ **이펙트:** PixiJS v8 유지. Pixi는 장식 레이어만 그리고 "탭해서 시작" 뒤에 지연 로드한다. 릴·카드·보드·텍스트는 DOM/SVG다.
+- ✅ **루트:** 게임 로비가 사이트 루트(`/index.html`). 루트 리다이렉트 없음.
+- ✅ **가상 이름:** 카지노 "오로벨 카지노 / OROBELLE CASINO", 해양 아케이드 머신 "심해전설 / ABYSS LEGEND".
 - 실제 돈, 결제, 외부 링크 없음. 크레딧은 무료 재충전. 리더보드·일일 보상 없음. 레벨·XP는 세션 안에서만.
 - 에셋은 직접 제작 또는 명확한 라이선스.
 
 ## 8. 미결 사항
 - [ ] 대상: 중고생 / 대학생 / 일반?
 - [ ] 사용 환경: 수업용 / 개인 접속용?
-- [ ] MVP 게임 범위. **권장: 로비 + 슬롯(C) + 룰렛(B) + 블랙잭(A) + 크래시(B) + 해양 아케이드 슬롯(D, 바다이야기형).** 해양 아케이드 슬롯은 일반 슬롯의 릴·이펙트 엔진을 재사용할 수 있어 추가 비용이 작다.
-- [ ] 해양 아케이드 머신의 가상 이름과 비주얼 콘셉트.
-- [ ] 이펙트 엔진: PixiJS (현재 기본값) vs Canvas 2D + CSS. 모바일 번들 크기와 함께 판단한다.
 - [ ] `prefers-reduced-motion` 처리 (현재 기본값: 점멸·흔들림만 줄임).
 - [ ] PWA 방향 고정: 세로 고정(현재 기본값) vs 자유 회전.
 - [ ] 데스크톱의 gambling 표시: 휴대폰 크기 프레임(현재 기본값) vs 데스크톱 전용 레이아웃.
@@ -266,12 +269,12 @@
 - [ ] 블랙잭 연속 셔플 모드 추가 여부.
 - [ ] 정산 화면 "다시 하기" (현재 기본값: 없음).
 - [ ] 세션 상한과 게임 내 처리 방식.
-- [ ] 루트 `/` 처리 (현재 기본값: gambling으로 리다이렉트).
 - [ ] 서사 레이어 포함 여부.
 - [ ] 이탈리아 도움 연락처 추가 여부 (번호 확인 필요).
+- [ ] 슬롯 변형 a/b 최종 선택 (`?sv=b`, 실제 휴대폰 비교 후).
 
 ## 9. 다음 단계
-1. `claude/claude-code-prompt.md`로 Claude Code에서 구현을 시작한다 (Phase 0~7).
+1. `docs/BASE_PROMPT.md`로 Claude Code에서 구현을 시작한다 (Phase 0~7).
 2. Phase 2(슬롯 + 자극 시스템, 모바일 우선)가 끝나면 실제 휴대폰에서 체감 품질을 확인하고 기준을 정한다.
 3. 미결 사항은 구현하면서 결정하고, 이 문서와 프롬프트에 반영한다.
 
@@ -287,3 +290,11 @@
 - 2026-11-24: **PWA**(§6.1)와 **모바일 우선 설계**(§6.2) 확정. 전체화면 표시로 상태바 시계를 숨기는 것을 시간 왜곡 메커니즘에 추가하고, "접근성/상시성" 메커니즘, 스와이프 스핀, 기기·표시 모드 로그, 앱 삭제 안내, PWA 재방문 유도 기능 금지를 추가. 세로 고정 여부를 미결 사항에 추가.
 - 2026-11-24: 모바일 우선의 근거를 기록(도박을 처음 접하는 경로는 모바일). 데스크톱은 보조 환경으로 두고, gambling을 휴대폰 크기 프레임으로 보여주는 것을 기본값(미결)으로 추가.
 - 2026-11-24: **바다이야기 케이스 추가**(§4.8). D 부류(사전 결정형) 신설, 가상 해양 아케이드 머신(예시, 메모리 연타, 상품권 연출), 출처를 붙인 사건 해설, 세션 연결 해석. MVP 권장안에 포함.
+- 2026-11-25: 구현 프롬프트 경로를 `docs/BASE_PROMPT.md`로 정정. 설계 문서 `docs/ARCHITECTURE.md`, 결정 로그 `docs/DECISIONS.md` 참조를 추가.
+- 2026-11-25: URL 구조 확정. 배포 주소 https://isaack.dev/gambling/, 게임 로비를 사이트 루트(`/index.html`)로 두고 루트 리다이렉트는 없앰. `/understanding/` 유지. PWA `start_url`과 `scope`는 사이트 base.
+- 2026-11-25: 이펙트 엔진 PixiJS v8 유지. Pixi는 장식 레이어만 그리고 탭해서 시작 뒤 지연 로드, 릴·카드·보드·텍스트는 DOM/SVG.
+- 2026-11-25: 가상 이름 확정. 카지노 "오로벨 카지노 / OROBELLE CASINO", 해양 아케이드 머신 "심해전설 / ABYSS LEGEND".
+- 2026-11-25: 해양 아케이드 잔여 보너스 큐는 세션 종료(CASH OUT) 또는 파산 직전에 한꺼번에 지급 (§4.8.2).
+- 2026-11-25: 슬롯 변형 a(적중률 약 40.6%)·b(약 30.0%, RTP 둘 다 약 94%) 구현, `?sv=b`로 선택. 최종 선택은 실기기 비교 후 (§4.7, §8).
+- 2026-11-25: CI RTP 기준을 "정확 계산 + 몬테카를로, 표준오차 4배 이내"로 교체. 10⁶ 라운드 ±0.3%p는 슬롯 검증에 통계적으로 부족.
+- 2026-11-25: MVP 게임 범위 확정 (로비 + 슬롯 + 룰렛 + 블랙잭 + 크래시 + 해양 아케이드 슬롯). §8에서 §7로 이동.

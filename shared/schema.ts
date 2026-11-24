@@ -27,15 +27,18 @@ export type Session = {
 };
 
 /**
- * kind values: ticker{name,game,amt}, hot{games}, crowd{n}, level{n}, bg, fg, mute{on}, install{step}, resume.
+ * kind values: ticker{name,game,amt}, hot{games}, crowd{n}, level{n}, bg, fg, mute{on}, install{step}, resume,
+ * gfx{b: "gl" | "none", q?, why?}.
  */
 export type Aux = { t: number; kind: string; d?: Record<string, unknown> };
 
 /**
  * One settled round. Field roles: `out` = honest outcome, `dec` = player choices,
- * A leftover-queue flush is a normal Ev: game "ocean", bet 0, payout = remaining, dec {bonusSeqId, flush: true}.
  * `ctl` = how it was operated, `disp` = what was shown, `fx` = stimuli that occurred.
  * `payout` is the total returned to the wallet including the stake; `net = payout - bet`.
+ * A leftover-queue flush is a normal Ev: game "ocean", bet 0, payout = net = remaining, dec {bonusSeqId, flush: true}
+ * (+ seqs: {id, amount}[] when more than one sequence was queued); round = ocean rounds settled so far, no out/disp/ctl, fx [].
+ * It is not a round: round counters skip Evs with dec.flush.
  */
 export type Ev = {
   t: number; game: GameId; round: number;

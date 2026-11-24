@@ -1,4 +1,4 @@
-import type { GameId } from "../../shared/config";
+import type { GameId, SlotVariant } from "../../shared/config";
 import type { Lang } from "../../shared/i18n";
 import type { Logger } from "../../shared/logger";
 import type { Rng, Streams } from "../../shared/rng";
@@ -79,6 +79,8 @@ export interface Settings {
   readonly lang: Lang;
   readonly reducedMotion: boolean;
   muted: boolean;
+  /** Slot math variant (`?sv=`). Only the slot reads it: SLOTS[ctx.settings.sv]. */
+  readonly sv: SlotVariant;
 }
 
 /** JSON values only; lives for the session. */

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "types": ["vite/client", "node"],
+    "paths": {
+      "@shared/*": ["./shared/*"],
+      "@i18n/*": ["./i18n/*"]
+    }
+  },
+  "include": ["gambling", "understanding", "shared", "scripts", "i18n/*.json", "vite.config.ts", "vitest.config.ts"]
+}

@@ -1,0 +1,23 @@
+{
+  "name": "gambling",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.7",
+    "pixi.js": "^8.23.0",
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2",
+    "uplot": "^1.6.32",
+    "vite": "^8.3.8",
+    "vite-plugin-pwa": "^2.0.0",
+    "vitest": "^5.1.1"
+  }
+}

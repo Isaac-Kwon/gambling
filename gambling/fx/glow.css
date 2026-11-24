@@ -1,0 +1,180 @@
+/*
+ * fx DOM layer (#fx-dom): tier banner, count-up digits, rings, dim, flash.
+ * Rules (ARCHITECTURE §2.3, §6.6):
+ *  - Glows are static layers (text-shadow / box-shadow drawn once); animations change only opacity/transform.
+ *  - Infinite animations that change opacity|filter|background|color|box-shadow: period >= 1 s, ease-in-out.
+ *  - Fast large brightness changes exist only as .fx-flash, created by fx.flash() after the flash guard.
+ */
+
+.fx-dom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 3;
+  contain: layout style;
+}
+
+/* ---------------------------------------------------------------- tier banner */
+.fx-banner {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  transform: translate(-50%, -50%);
+  display: none;
+  text-align: center;
+  white-space: nowrap;
+  font-family: "Lilita One", system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  --edge: #2a0f00;
+  --halo: var(--gold-2, #f5c542);
+  --halo-2: var(--crimson, #ff2d55);
+}
+.fx-banner.fx-on { display: block; }
+.fx-banner[data-tier="1"] { --halo: var(--cyan, #29e6ff); --halo-2: var(--violet, #7a3cff); }
+.fx-banner[data-tier="2"] { --halo: var(--gold-2, #f5c542); --halo-2: var(--crimson, #ff2d55); }
+.fx-banner[data-tier="3"] { --halo: var(--magenta, #ff3da5); --halo-2: var(--gold-2, #f5c542); }
+.fx-banner[data-tier="4"] { --halo: var(--violet, #7a3cff); --halo-2: var(--cyan, #29e6ff); }
+
+/* Soft burst behind the title (static gradient; only its opacity breathes). */
+.fx-banner-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 150%;
+  height: 260%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(closest-side, rgba(255, 233, 166, 0.55), rgba(245, 197, 66, 0.22) 45%, rgba(122, 60, 255, 0) 100%);
+  animation: fx-breathe 1.4s ease-in-out infinite alternate;
+}
+
+.fx-banner-title {
+  position: relative;
+  display: inline-block;
+  font-size: 56px;
+  padding: 0 0.12em;
+  animation: fx-float 1.8s ease-in-out infinite alternate;
+}
+.fx-banner[data-tier="1"] .fx-banner-title { font-size: 44px; }
+.fx-banner[data-tier="3"] .fx-banner-title { font-size: 60px; }
+.fx-banner[data-tier="4"] .fx-banner-title { font-size: 64px; }
+
+/* Thick dark outline + neon halo: a static layer behind the face. */
+.fx-banner-glow {
+  position: absolute;
+  inset: 0;
+  padding: inherit;
+  color: var(--edge);
+  -webkit-text-stroke: 0.2em var(--edge);
+  text-shadow:
+    0 0 0.18em var(--halo),
+    0 0 0.45em var(--halo),
+    0 0 0.9em var(--halo-2);
+  animation: fx-breathe 1.2s ease-in-out infinite alternate;
+}
+
+/* Gold face (top to bottom gradient) with a thin inner line. */
+.fx-banner-face {
+  position: relative;
+  display: inline-block;
+  color: transparent;
+  background: linear-gradient(180deg, #fffbe8 0%, var(--gold-1, #ffe9a6) 22%, var(--gold-2, #f5c542) 55%, var(--gold-3, #b8791a) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 1.5px #7a4a0a;
+}
+
+/* Shine sweep: a soft-edged window (moved by transform) over a bright copy of the text (counter-moved). */
+.fx-banner-shinewin {
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: 0;
+  width: 42%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 40%, #000 60%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 40%, #000 60%, transparent);
+  will-change: transform;
+}
+.fx-banner-shinetext {
+  position: absolute;
+  top: 8.333%; /* = 10% of the title: the window is 120% tall */
+  left: 0;
+  padding: 0 0.12em;
+  color: transparent;
+  background: linear-gradient(180deg, #ffffff, #fff3c4 60%, #ffe08a);
+  -webkit-background-clip: text;
+  background-clip: text;
+  opacity: 0.9;
+  will-change: transform;
+}
+
+.fx-banner-amt {
+  position: relative;
+  margin-top: 0.12em;
+  font-size: 42px;
+  font-weight: 900;
+}
+.fx-banner-amt:empty { display: none; }
+/* Each digit cell carries the gold face and a dark outline (no filter: the number changes every frame). */
+.fx-banner-amt .fx-d {
+  color: transparent;
+  background: linear-gradient(180deg, #ffffff 0%, var(--gold-1, #ffe9a6) 30%, var(--gold-2, #f5c542) 62%, var(--gold-3, #b8791a) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: 5px #2a0f00;
+  paint-order: stroke fill;
+}
+
+/* Fixed-width digit cells so a counting number does not jitter (§2.4). */
+.fx-d {
+  display: inline-block;
+  width: 0.62em;
+  text-align: center;
+}
+.fx-d.fx-sep { width: 0.3em; }
+
+/* ---------------------------------------------------------------- rings (win emphasis, reel build-up) */
+.fx-ring {
+  position: absolute;
+  box-sizing: border-box;
+  border-radius: 14px;
+  border: 2px solid var(--gold-1, #ffe9a6);
+  box-shadow:
+    0 0 6px var(--gold-2, #f5c542),
+    0 0 18px var(--gold-2, #f5c542),
+    0 0 34px rgba(255, 61, 165, 0.55),
+    inset 0 0 12px rgba(245, 197, 66, 0.6);
+  animation: fx-breathe 1.1s ease-in-out infinite alternate;
+}
+.fx-ring--antic {
+  border-color: #fff1fa;
+  box-shadow:
+    0 0 6px var(--magenta, #ff3da5),
+    0 0 20px var(--magenta, #ff3da5),
+    0 0 40px var(--cyan, #29e6ff),
+    inset 0 0 16px rgba(255, 61, 165, 0.65);
+  animation-duration: 1s;
+}
+
+/* ---------------------------------------------------------------- dim and flash (opacity driven from JS) */
+.fx-dim {
+  position: absolute;
+  background: #000;
+  opacity: 0;
+}
+.fx-flash {
+  position: absolute;
+  opacity: 0;
+}
+
+@keyframes fx-breathe {
+  from { opacity: 0.5; }
+  to { opacity: 1; }
+}
+@keyframes fx-float {
+  from { transform: translateY(-3px) rotate(-0.6deg); }
+  to { transform: translateY(3px) rotate(0.6deg); }
+}

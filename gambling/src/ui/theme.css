@@ -1,0 +1,202 @@
+/* OROBELLE theme: palette tokens (ARCHITECTURE 2.2), reset, page backdrop, phone frame (2.5),
+   layer order (4.4), rotate overlay, fx=off switch.
+   Flash rule (2.3): an infinite animation that changes opacity/filter/background/color/shadows
+   must run >= 1s per cycle with ease-in-out; transform-only loops are free. Enforced by ui.test.ts. */
+
+:root {
+  /* palette (2.2) */
+  --bg: #0B0612;
+  --surface: #1A0F2B;
+  --surface-2: #2A1745;
+  --gold-1: #FFE9A6;
+  --gold-2: #F5C542;
+  --gold-3: #B8791A;
+  --red: #E0183C;
+  --crimson: #FF2D55;
+  --magenta: #FF3DA5;
+  --cyan: #29E6FF;
+  --violet: #7A3CFF;
+  --win: #3DFF8A;
+  --text: #FFF6E0;
+  --muted: #A99BC2;
+
+  /* derived */
+  --ink: #3A1606;                 /* dark outline under gold */
+  --ink-deep: #1A0805;
+  --gold-grad: linear-gradient(180deg, #FFF8DC 0%, var(--gold-1) 20%, var(--gold-2) 46%, #C98A1E 50%, #F0B93A 70%, var(--gold-3) 100%);
+  --gold-text: linear-gradient(180deg, #FFFBEA 0%, var(--gold-1) 28%, var(--gold-2) 55%, #E0A42E 56%, var(--gold-3) 100%);
+  --crimson-grad: linear-gradient(180deg, #FF8AA3 0%, var(--crimson) 36%, var(--red) 64%, #8E0721 100%);
+  --violet-grad: linear-gradient(180deg, #B99BFF 0%, #8F5BFF 34%, var(--violet) 60%, #3E1699 100%);
+  --dark-grad: linear-gradient(180deg, #3C2463 0%, #24133E 50%, #160C27 100%);
+  --panel-grad: linear-gradient(180deg, #2E1A4F 0%, var(--surface) 38%, #120A20 100%);
+
+  /* type (2.4): Lilita One has latin glyphs only; Hangul falls through to the system stack */
+  --font-ko: system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+  --font-display: "Lilita One", var(--font-ko);
+
+  /* frame & safe area (2.5) */
+  --frame-w: min(100vw, 430px);
+  --frame-h: min(100dvh, 932px);
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --tap: 44px;
+  --gutter: 16px;
+
+  /* stacking inside #frame (4.4): screen/HUD < #gfx < #fx-dom < sheet < modal < top (gate, receipt) < rotate */
+  --z-gfx: 20;
+  --z-fxdom: 30;
+  --z-sheet: 40;
+  --z-modal: 50;
+  --z-top: 60;
+  --z-rotate: 1000;
+
+  --ease-pop: cubic-bezier(.2, 1.45, .45, 1);
+  --ease-out: cubic-bezier(.2, .9, .25, 1);
+
+  color-scheme: dark;
+}
+
+/* ---------- reset ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; height: 100%; }
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  background: var(--bg);
+  overscroll-behavior: none;     /* no pull-to-refresh / bounce on the game page */
+}
+body {
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow: hidden;
+  overscroll-behavior: none;
+  display: grid;
+  place-items: center;
+  font-family: var(--font-ko);
+  font-synthesis: none;
+  color: var(--text);
+  line-height: 1.35;
+  word-break: keep-all;          /* Korean wraps at word boundaries */
+  overflow-wrap: break-word;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-tap-highlight-color: transparent;
+  /* dark casino backdrop with blurred light blobs (seen around the frame on tablet/desktop) */
+  background:
+    radial-gradient(38vmax 38vmax at 10% 16%, rgba(255, 61, 165, .20), transparent 70%),
+    radial-gradient(34vmax 34vmax at 92% 20%, rgba(41, 230, 255, .12), transparent 70%),
+    radial-gradient(52vmax 42vmax at 82% 92%, rgba(122, 60, 255, .26), transparent 70%),
+    radial-gradient(30vmax 30vmax at 16% 88%, rgba(245, 197, 66, .13), transparent 70%),
+    var(--bg);
+}
+body::before { /* bokeh dots */
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 22% 34%, rgba(255, 233, 166, .16) 0 26px, transparent 46px),
+    radial-gradient(circle at 76% 58%, rgba(255, 61, 165, .16) 0 34px, transparent 60px),
+    radial-gradient(circle at 64% 12%, rgba(41, 230, 255, .12) 0 18px, transparent 34px),
+    radial-gradient(circle at 34% 78%, rgba(122, 60, 255, .2) 0 40px, transparent 70px),
+    radial-gradient(circle at 88% 82%, rgba(255, 233, 166, .1) 0 22px, transparent 40px),
+    radial-gradient(circle at 8% 60%, rgba(255, 45, 85, .12) 0 20px, transparent 38px);
+}
+button { font: inherit; color: inherit; margin: 0; }
+h1, h2, h3, p { margin: 0; }
+[hidden] { display: none !important; }
+
+/* ---------- phone frame (2.5) ---------- */
+#frame {
+  position: relative;
+  isolation: isolate;
+  width: var(--frame-w);
+  height: 100vh;
+  height: var(--frame-h);
+  overflow: hidden;
+  padding: var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l);
+  background:
+    radial-gradient(120% 55% at 50% -6%, rgba(122, 60, 255, .42), transparent 62%),
+    radial-gradient(90% 40% at 50% 104%, rgba(255, 61, 165, .22), transparent 64%),
+    linear-gradient(180deg, #1C0C31 0%, var(--bg) 52%, #13081F 100%);
+  /* touch suppression only inside the game frame */
+  touch-action: manipulation;
+  overscroll-behavior: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+#frame::before { /* faint diamond lattice */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .5;
+  background:
+    repeating-linear-gradient(45deg, rgba(245, 197, 66, .045) 0 1px, transparent 1px 22px),
+    repeating-linear-gradient(-45deg, rgba(245, 197, 66, .045) 0 1px, transparent 1px 22px);
+  -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 38%, transparent 70%, #000 100%);
+  mask-image: linear-gradient(180deg, #000 0%, transparent 38%, transparent 70%, #000 100%);
+}
+@media (min-width: 440px) and (min-height: 600px) {
+  #frame {
+    border-radius: 34px;
+    box-shadow:
+      0 0 0 1px rgba(255, 233, 166, .45),
+      0 0 0 7px #120A1E,
+      0 0 0 8px rgba(245, 197, 66, .28),
+      0 30px 90px rgba(0, 0, 0, .75),
+      0 0 140px rgba(122, 60, 255, .35);
+  }
+}
+#gfx { position: absolute; inset: 0; z-index: var(--z-gfx); pointer-events: none; }
+#gfx > canvas { width: 100%; height: 100%; display: block; }
+#fx-dom { position: absolute; inset: 0; z-index: var(--z-fxdom); pointer-events: none; }
+
+/* ---------- rotate overlay (landscape, height < 480px) ---------- */
+.ui-rotate {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-rotate);
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px max(16px, var(--safe-r)) 16px max(16px, var(--safe-l));
+  text-align: center;
+  background:
+    radial-gradient(60% 80% at 50% 40%, rgba(122, 60, 255, .35), transparent 70%),
+    var(--bg);
+  touch-action: none;
+}
+@media (orientation: landscape) and (max-height: 479.98px) {
+  .ui-rotate { display: flex; }
+}
+.ui-rotate__art { width: 96px; height: 96px; }
+.ui-rotate__phone { transform-origin: 60px 60px; transform-box: view-box; animation: ui-rotate-hint 2.4s var(--ease-out) infinite; }
+.ui-rotate__body { color: var(--muted); font-size: 14px; font-weight: 600; }
+
+/* ---------- fx=off: same DOM, plain look ---------- */
+:root[data-fx="off"] .ui-glow { display: none; }
+:root[data-fx="off"] .ui-anim,
+:root[data-fx="off"] .ui-pill--hot,
+:root[data-fx="off"] .ui-btn--shine::after { animation: none; }
+:root[data-fx="off"] .ui-btn--shine::after { display: none; }
+
+/* ---------- shared keyframes ---------- */
+@keyframes ui-breathe { from { opacity: .55; } to { opacity: 1; } }
+@keyframes ui-turn { to { transform: rotate(360deg); } }
+@keyframes ui-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.09); } }
+@keyframes ui-sweep {
+  0% { transform: translateX(-160%) skewX(-22deg); }
+  55%, 100% { transform: translateX(360%) skewX(-22deg); }
+}
+@keyframes ui-rotate-hint {
+  0%, 15% { transform: rotate(-90deg); }
+  50%, 80% { transform: rotate(0deg); }
+  100% { transform: rotate(-90deg); }
+}

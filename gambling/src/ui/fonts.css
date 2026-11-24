@@ -1,0 +1,3 @@
+/* Display face for logo, tier banners and numbers (ARCHITECTURE 2.4): Lilita One, latin subset only.
+   font-display: swap comes from @fontsource. Hangul always uses the system stack (--font-ko). */
+@import "@fontsource/lilita-one/latin-400.css";

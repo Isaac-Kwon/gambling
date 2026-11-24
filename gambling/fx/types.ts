@@ -25,12 +25,17 @@ export interface Fx {
   idle(): Promise<void>;
   /** Tier banner, count-up, particles, shake, sound and haptics bundled by payout/bet tier. payout > 0 always celebrates, even if payout < bet; payout === 0 does nothing. */
   celebrate(o: { amount: number; bet: number; target: HTMLElement; anchor?: HTMLElement }): FxRun;
-  countup(o: { el: HTMLElement; from: number; to: number; ms: number; tick?: boolean }): FxRun;
+  /** `ms` is capped at 8000. Optional `k` = value recorded as the countup record's k (default 0); optional `fmt` formats the number (default "12,345"). */
+  countup(o: { el: HTMLElement; from: number; to: number; ms: number; tick?: boolean; k?: number; fmt?: (n: number) => string }): FxRun;
   /** `k` = particle count. */
   particles(kind: "coins" | "confetti" | "rays" | "bubbles" | "tickets", o: { k: number; at?: HTMLElement; ms?: number }): FxRun;
   /** `k` = amplitude in px (max 8, 1s; 0 under reduced motion). */
   shake(o: { el: HTMLElement; k: number; ms: number }): FxRun;
-  /** `k` = decelerated reels / multiplier / dim ratio depending on `kind`. */
+  /**
+   * `k` = decelerated reels / multiplier / dim ratio depending on `kind`.
+   * `rise`: calling it again on the same `el` while it runs updates k (max) and pitch and extends it to
+   * now + ms — one record per climb. Call `skip()` when the climb ends (crash: silent stop).
+   */
   antic(o: { el: HTMLElement; kind: "reel" | "rise" | "dim"; k: number; ms: number }): FxRun;
   /** If the flash guard refuses, nothing happens and nothing is recorded. `area` = screen fraction 0..1. */
   flash(o: { el: HTMLElement; color: string; ms: number; area: number }): FxRun;

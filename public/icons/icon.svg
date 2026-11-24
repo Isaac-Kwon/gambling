@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>OROBELLE</title>
+  <defs>
+    <radialGradient id="bg" cx="0.5" cy="0.44" r="0.62">
+      <stop offset="0" stop-color="#3B1D66"/>
+      <stop offset="0.55" stop-color="#1A0F2B"/>
+      <stop offset="1" stop-color="#0B0612"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF8DC"/>
+      <stop offset="0.22" stop-color="#FFE9A6"/>
+      <stop offset="0.48" stop-color="#F5C542"/>
+      <stop offset="0.5" stop-color="#C98A1E"/>
+      <stop offset="0.72" stop-color="#F0B93A"/>
+      <stop offset="1" stop-color="#B8791A"/>
+    </linearGradient>
+    <linearGradient id="lip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFE9A6"/>
+      <stop offset="0.5" stop-color="#F5C542"/>
+      <stop offset="0.52" stop-color="#B8791A"/>
+      <stop offset="1" stop-color="#F0B93A"/>
+    </linearGradient>
+    <linearGradient id="crimson" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FF8AA3"/>
+      <stop offset="0.35" stop-color="#FF2D55"/>
+      <stop offset="1" stop-color="#9E0A26"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <g fill="#FFFFFF">
+    <circle cx="70" cy="420" r="3" fill-opacity="0.5"/>
+    <circle cx="446" cy="392" r="4" fill-opacity="0.4"/>
+    <circle cx="452" cy="64" r="3" fill-opacity="0.45"/>
+    <circle cx="60" cy="74" r="2.5" fill-opacity="0.4"/>
+  </g>
+  <g transform="translate(256 262) scale(0.9) translate(-256 -262)">
+    <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M42 262a214 214 0 1 0 428 0a214 214 0 1 0 -428 0Z" stroke="#FF3DA5" stroke-width="40" stroke-opacity="0.12"/>
+      <path d="M42 262a214 214 0 1 0 428 0a214 214 0 1 0 -428 0Z" stroke="#FF3DA5" stroke-width="22" stroke-opacity="0.28"/>
+      <path d="M42 262a214 214 0 1 0 428 0a214 214 0 1 0 -428 0Z" stroke="#FF3DA5" stroke-width="9"/>
+      <path d="M42 262a214 214 0 1 0 428 0a214 214 0 1 0 -428 0Z" stroke="#FFFFFF" stroke-width="3" stroke-opacity="0.85"/>
+    </g>
+    <circle cx="256" cy="104" r="24" fill="none" stroke="#3A1606" stroke-width="22"/>
+    <circle cx="256" cy="104" r="24" fill="none" stroke="url(#gold)" stroke-width="11"/>
+    <circle cx="256" cy="418" r="24" fill="url(#gold)" stroke="#3A1606" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M256 126C190 126 154 176 150 248L144 314C141 340 124 356 100 366H412C388 356 371 340 368 314L362 248C358 176 322 126 256 126Z" fill="url(#gold)" stroke="#3A1606" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M188 182C172 204 166 232 164 262L160 312C170 300 176 284 178 262L182 226C184 208 186 194 188 182Z" fill="#FFFFFF" fill-opacity="0.55"/>
+    <rect x="88" y="360" width="336" height="34" rx="17" fill="url(#lip)" stroke="#3A1606" stroke-width="10" stroke-linejoin="round"/>
+    <path d="M256.00 202.00L272.46 245.35L318.77 247.60L282.63 276.65L294.79 321.40L256.00 296.00L217.21 321.40L229.37 276.65L193.23 247.60L239.54 245.35Z" fill="url(#crimson)" stroke="#3A1606" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M250.00 226.00L257.05 246.29L278.53 246.73L261.41 259.71L267.63 280.27L250.00 268.00L232.37 280.27L238.59 259.71L221.47 246.73L242.95 246.29Z" fill="#FFFFFF" fill-opacity="0.35"/>
+    <circle cx="352" cy="168" r="14" fill="#FFFFFF" fill-opacity="0.25"/>
+    <path d="M352 142Q356.68 163.32 378 168Q356.68 172.68 352 194Q347.32 172.68 326 168Q347.32 163.32 352 142Z" fill="#FFFFFF"/>
+    <circle cx="150" cy="392" r="8" fill="#29E6FF" fill-opacity="0.25"/>
+    <path d="M150 378Q152.52 389.48 164 392Q152.52 394.52 150 406Q147.48 394.52 136 392Q147.48 389.48 150 378Z" fill="#29E6FF"/>
+  </g>
+</svg>

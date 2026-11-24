@@ -9,3 +9,4 @@
 - 2026-11-24 [i18n] Sync JSON dictionaries, `makeT` per-page modules (i18n.gambling / i18n.understanding, so each bundle only holds its own strings) fall back to ko on empty/missing — en/it hold keys only in MVP; test enforces key parity
 - 2026-11-24 [deps] vite 8.3.8, typescript 7.0.2, vitest 5.1.1, vite-plugin-pwa 2.0.0 (peer supports vite ^8), pixi.js 8.23.0, uplot 1.6.32, tsx 4.23.15 — current releases; vite 8 is within vite-plugin-pwa peer range
 - 2026-11-24 [ci] Actions: checkout@v6, setup-node@v6, upload-pages-artifact@v5, deploy-pages@v5 — rtp and check:bundle steps left as comments until those scripts exist
+- 2026-11-24 [ci] CI uses `npm install` instead of `npm ci` — a lockfile generated on Windows drops @emnapi/core|runtime (rolldown wasm optional deps), so `npm ci` fails on Linux (npm bug); revisit when npm fixes it

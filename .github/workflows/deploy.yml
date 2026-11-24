@@ -23,7 +23,8 @@ jobs:
         with:
           node-version: 24
           cache: npm
-      - run: npm ci
+      # npm ci fails on Linux: lockfile written on Windows omits rolldown's wasm optional deps (@emnapi/*) — npm bug
+      - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm test
       # - run: npm run rtp            # Phase 1

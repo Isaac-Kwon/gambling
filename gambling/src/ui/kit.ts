@@ -57,7 +57,7 @@ export function setFxMode(mode: 'on' | 'off', root: HTMLElement = document.docum
 // ---------------------------------------------------------------- icons
 
 export type IconName =
-  | 'close' | 'plus' | 'minus' | 'back' | 'sound' | 'mute' | 'bolt' | 'loop' | 'coin' | 'star' | 'crown' | 'grid' | 'gear';
+  | 'close' | 'plus' | 'minus' | 'back' | 'sound' | 'mute' | 'bolt' | 'loop' | 'coin' | 'star' | 'crown' | 'grid' | 'gear' | 'help';
 
 /** Cog outline: `teeth` square-ish teeth between radius `r0` and `r1`, centred on (12, 12). */
 function gearPath(teeth = 8, r0 = 7.6, r1 = 10.4): string {
@@ -77,12 +77,14 @@ const STROKE: Partial<Record<IconName, string>> = {
   plus: 'M12 5V19M5 12H19',
   minus: 'M5 12H19',
   back: 'M15 4.5L7.5 12L15 19.5',
+  help: 'M8.6 8.9A3.5 3.5 0 1 1 13.6 12.1C12.6 12.6 12 13.4 12 14.5V15.2',
   loop: 'M4.5 12A7.5 7.5 0 0 1 17.6 7M19.5 12A7.5 7.5 0 0 1 6.4 17M18 3V7.2H13.8M6 21V16.8H10.2',
 };
 const FILL: Partial<Record<IconName, string>> = {
   bolt: 'M13.5 2L4.5 13.5H11L10 22L19.5 10H13Z',
   star: starPath(12, 12.6, 10.5, 4.4),
   crown: 'M3 18.5L4.6 7.5L9.2 11.6L12 4.5L14.8 11.6L19.4 7.5L21 18.5Z',
+  help: 'M10.4 19.4A1.6 1.6 0 1 0 13.6 19.4A1.6 1.6 0 1 0 10.4 19.4Z',
   grid: 'M4 4H10.5V10.5H4ZM13.5 4H20V10.5H13.5ZM4 13.5H10.5V20H4ZM13.5 13.5H20V20H13.5Z',
 };
 

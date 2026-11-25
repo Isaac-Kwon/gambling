@@ -3,6 +3,7 @@
   "hud.balance": "CREDITS",
   "hud.bonus": "심해전설 BONUS +{amt}",
   "hud.cashout": "CASH OUT",
+  "hud.help": "게임 방법",
   "hud.level": "LV {n}",
   "hud.levelup": "LEVEL UP!"
 }

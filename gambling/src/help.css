@@ -1,0 +1,51 @@
+/* How-to-play sheet (help.ts). */
+.ui-sheet--help { max-height: 90%; }
+.hp { display: flex; flex-direction: column; gap: 18px; padding-bottom: 8px; }
+.hp-sec { display: flex; flex-direction: column; gap: 8px; }
+.hp-sec__title {
+  margin: 0;
+  font-family: var(--font-ko);
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  color: var(--gold-2);
+  text-shadow: 0 0 8px rgba(245, 197, 66, .35);
+}
+.hp-p, .hp-list {
+  margin: 0;
+  font-family: var(--font-ko);
+  font-size: 14px;
+  line-height: 1.55;
+  color: #FFF6E0;
+}
+.hp-list { padding-left: 1.2em; display: flex; flex-direction: column; gap: 4px; }
+.hp-list li::marker { color: var(--gold-2); }
+.hp-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, .42);
+  box-shadow: inset 0 0 0 1px rgba(245, 197, 66, .35);
+}
+.hp-table { width: 100%; border-collapse: collapse; font-family: var(--font-ko); font-size: 13.5px; color: #FFF6E0; }
+.hp-table th, .hp-table td { padding: 7px 10px; text-align: left; vertical-align: middle; }
+.hp-table th { font-size: 12px; font-weight: 800; letter-spacing: .04em; color: var(--muted); border-bottom: 1px solid rgba(245, 197, 66, .3); }
+.hp-table tbody tr + tr td { border-top: 1px solid rgba(255, 246, 224, .08); }
+.hp-table .hp-num { text-align: right; font-variant-numeric: tabular-nums; font-weight: 800; color: var(--gold-2); white-space: nowrap; }
+.hp-sym { display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.hp-syms { display: inline-flex; flex-wrap: wrap; gap: 4px 12px; }
+.hp-sym img { width: 30px; height: 30px; flex: none; display: block; }
+.hp-lines { display: grid; grid-template-columns: repeat(auto-fill, minmax(62px, 1fr)); gap: 8px; }
+.hp-line-box { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.hp-line-n { font-size: 11px; font-weight: 800; color: var(--muted); }
+.hp-line {
+  display: grid;
+  grid-template-columns: repeat(5, 9px);
+  grid-auto-rows: 9px;
+  gap: 2px;
+  padding: 4px;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, .42);
+  box-shadow: inset 0 0 0 1px rgba(245, 197, 66, .3);
+}
+.hp-line i { border-radius: 2px; background: rgba(255, 246, 224, .1); }
+.hp-line i.on { background: var(--gold-2); box-shadow: 0 0 5px rgba(245, 197, 66, .7); }

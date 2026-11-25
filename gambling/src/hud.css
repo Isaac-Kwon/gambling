@@ -46,6 +46,8 @@
 .hud__emblem .ui-emblem { width: 40px; height: 40px; filter: drop-shadow(0 0 6px rgba(255, 61, 165, .55)); }
 .hud[data-route="lobby"] .hud__back { visibility: hidden; }
 .hud[data-route="game"] .hud__emblem { visibility: hidden; }
+.hud__help { flex: none; }
+.hud[data-route="lobby"] .hud__help { display: none; }
 
 .hud__bal {
   position: relative;

@@ -1,6 +1,6 @@
 /**
  * Top HUD (BASE_PROMPT §5.1, ARCHITECTURE §6.2–6.3): shared credit balance (counted up on gains), session
- * level + XP bar, CASH OUT (always visible), back-to-lobby inside games, and two notices from the runtime:
+ * level + XP bar, CASH OUT (always visible), back-to-lobby and how-to-play (?) inside games, and two notices from the runtime:
  * the ocean bonus line (`hud.bonus`, shown even with fx off — it explains a balance change) and the level-up
  * banner. No clock anywhere.
  *
@@ -10,6 +10,7 @@
  */
 import './hud.css';
 import { t } from '../../shared/i18n.gambling';
+import type { GameId } from '../../shared/config';
 import type { Fx } from '../fx/types';
 import type { Route } from './router';
 import type { SessionRuntime } from './session';
@@ -24,6 +25,8 @@ export interface HudOptions {
   fxOn: boolean;
   /** Back button inside a game. */
   onBack(): void;
+  /** ? button inside a game: open that game's how-to-play sheet. */
+  onHelp(game: GameId): void;
 }
 
 export interface Hud {
@@ -65,6 +68,12 @@ export function mountHud(host: HTMLElement, o: HudOptions): Hud {
   const coin = h('span', 'hud__coin', [icon('coin', 22)]);
   const balBox = h('div', 'hud__bal', [h('span', 'hud__bal-glow'), coin, h('span', 'hud__bal-num', [bal.el])]);
 
+  // ---- how to play (games only)
+  let game: GameId | null = null;
+  const help = iconButton({ icon: 'help', aria: t('hud.help'), variant: 'violet', testid: 'btn-help', onTap: () => { if (game && !locked) o.onHelp(game); } });
+  help.classList.add('hud__help');
+  help.tabIndex = -1;
+
   // ---- cash out
   const cash = button({ label: t('hud.cashout'), variant: 'red', size: 'sm', testid: 'btn-cashout', onTap: () => requestCashout() });
   cash.classList.add('hud__cash');
@@ -76,7 +85,7 @@ export function mountHud(host: HTMLElement, o: HudOptions): Hud {
   const xpRow = h('div', 'hud__xp', [lvl, bar.el]);
 
   const toasts = h('div', 'hud__toasts');
-  const el = h('div', 'hud', [h('div', 'hud__row', [left, balBox, cash]), xpRow, toasts]);
+  const el = h('div', 'hud', [h('div', 'hud__row', [left, balBox, help, cash]), xpRow, toasts]);
   el.dataset.route = 'lobby';
   host.textContent = '';
   host.append(el);
@@ -167,16 +176,20 @@ export function mountHud(host: HTMLElement, o: HudOptions): Hud {
     el,
     setRoute(r) {
       el.dataset.route = r.kind === 'game' ? 'game' : 'lobby';
+      game = r.kind === 'game' ? r.id : null;
       back.tabIndex = r.kind === 'game' ? 0 : -1;
+      help.tabIndex = r.kind === 'game' ? 0 : -1;
     },
     relabel() {
       back.setAttribute('aria-label', t('hud.back'));
+      help.setAttribute('aria-label', t('hud.help'));
       if (!cash.classList.contains('is-held')) setButtonLabel(cash, t('hud.cashout'));
       showLevel();
     },
     lock() {
       locked = true;
       back.disabled = true;
+      help.disabled = true;
       cash.disabled = true;
       cash.classList.remove('is-held');
       setButtonLabel(cash, t('hud.cashout'));

@@ -15,6 +15,7 @@ import { createClock } from './clock';
 import { detectEnv, type Env } from './env';
 import { mountGate } from './gate';
 import { mountReceipt } from './cashout';
+import { openHelp } from './help';
 import { mountHud } from './hud';
 import { mountLobby } from './lobby';
 import { parseParams, type AppParams } from './params';
@@ -214,6 +215,7 @@ export function startPage(app: App): void {
       const hud = mountHud(document.getElementById('hud') as HTMLElement, {
         rt, fx, clock: app.clock, fxOn: page.on,
         onBack: () => { void router.go({ kind: 'lobby' }); },
+        onHelp: (game) => { void openHelp({ game, sv: rt.settings.sv, fx, log: (g) => rt.logger.aux('help', { game: g }) }).catch(() => undefined); },
       });
       app.hooks.route = (r) => hud.setRoute(r);
       app.hooks.lobby = (root, r) => mountLobby(root, {

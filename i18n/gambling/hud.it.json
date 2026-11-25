@@ -3,6 +3,7 @@
   "hud.balance": "CREDITS",
   "hud.bonus": "ABYSS LEGEND BONUS +{amt}",
   "hud.cashout": "CASH OUT",
+  "hud.help": "Come si gioca",
   "hud.level": "LV {n}",
   "hud.levelup": "LEVEL UP!"
 }

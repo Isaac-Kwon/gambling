@@ -286,17 +286,25 @@ function marksHook(marks: Mark[] | undefined, theme: Theme): uPlotType.Hooks.Def
     ctx.setLineDash([3 * px, 3 * px]);
     ctx.font = `${11 * px}px system-ui, sans-serif`;
     ctx.textBaseline = 'top';
+    ctx.textAlign = 'left';
     const { left, top, width, height } = u.bbox;
-    for (const m of marks) {
+    // Labels are placed left to right; one that would overlap the previous label (or run off the
+    // plot) is dropped and only its dashed tick is drawn.
+    let labelEnd = -Infinity;
+    for (const m of [...marks].sort((a, b) => a.x - b.x)) {
       const x = Math.round(u.valToPos(m.x, 'x', true));
       if (x < left || x > left + width) continue;
       ctx.beginPath();
       ctx.moveTo(x, top);
       ctx.lineTo(x, top + height);
       ctx.stroke();
+      if (!m.label) continue;
       const tw = ctx.measureText(m.label).width;
-      const tx = x + 4 * px + tw > left + width ? x - 4 * px - tw : x + 4 * px;
+      let tx = x + 4 * px;
+      if (tx + tw > left + width) tx = x - 4 * px - tw;
+      if (tx < left || tx < labelEnd + 4 * px) continue;
       ctx.fillText(m.label, tx, top + 3 * px);
+      labelEnd = tx + tw;
     }
     ctx.restore();
   };

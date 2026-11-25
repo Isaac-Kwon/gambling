@@ -16,3 +16,7 @@
 .sc-job { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 8px 0 16px; font-size: 0.875rem; color: var(--ink-2); }
 .sc-job-bar { flex: 1 1 160px; max-width: 320px; height: 6px; accent-color: var(--accent); }
 .sc-job-failed { color: var(--muted); }
+
+/* deviation table: keep each cell on one line and let the wrapper scroll sideways rather than crush the columns */
+.sc-nowrap th, .sc-nowrap td { white-space: nowrap; padding-right: 10px; }
+.sc-nowrap td.num, .sc-nowrap th.num { padding-left: 10px; padding-right: 10px; }

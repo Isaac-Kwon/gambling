@@ -234,8 +234,8 @@ function statGrid(items: [string, string][]): HTMLElement {
   return wrap;
 }
 
-function table(head: { text: string; num?: boolean }[], rows: { text: string; num?: boolean }[][]): HTMLElement {
-  const wrap = h('div', 'table-wrap');
+function table(head: { text: string; num?: boolean }[], rows: { text: string; num?: boolean }[][], cls = ''): HTMLElement {
+  const wrap = h('div', cls ? `table-wrap ${cls}` : 'table-wrap');
   const tb = h('table');
   const thead = h('thead');
   const tr = h('tr');
@@ -410,6 +410,7 @@ function renderBlackjack(box: HTMLElement, env: Env, bj: BlackjackCheck): void {
         { text: t(`strategy.action.${d.optimal}`) },
         { text: d.evLossCredits === null ? '-' : f.num(d.evLossCredits, 1), num: true },
       ]),
+      'sc-nowrap',
     ));
     box.append(h('p', 'muted sc-note', t('strategy.bj.evNote')));
   }

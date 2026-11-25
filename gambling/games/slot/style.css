@@ -1,0 +1,301 @@
+/* ORO SEVENS screen. Rules (ARCHITECTURE 2.3): glows are static layers, loops animate transform/opacity only;
+   infinite loops that change opacity run >= 1s per cycle with ease-in-out (checked by fx/css.test.ts). */
+
+.slot {
+  --ch: 72px;
+  position: relative;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 6px 12px 10px;
+  color: var(--text);
+  font-family: var(--font-display);
+}
+.slot.is-small { gap: 6px; padding: 2px 8px 6px; }
+
+/* ------------------------------------------------------------------ marquee */
+.slot-top { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; align-items: center; justify-content: space-evenly; gap: 8px; }
+.slot.is-tall .slot-marquee { padding: 18px 14px 16px; }
+.slot.is-tall .slot-title { font-size: 40px; }
+.slot.is-tall .slot-subtitle { font-size: 12px; margin-top: 5px; }
+.slot.is-tall .slot-mini { width: 44px; height: 44px; }
+
+/* paytable ticker: real five-of-a-kind pays at the current bet, scrolling (transform only) */
+.slot-pays {
+  flex: none;
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  height: 30px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #06020B, #160A26);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, .9), 0 0 0 1.5px rgba(245, 197, 66, .55), 0 0 0 3.5px #1A0F2B;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(90deg, transparent 0, #000 22px, #000 calc(100% - 22px), transparent 100%);
+}
+.slot-pays__track { display: flex; width: max-content; height: 100%; align-items: center; animation: slot-scroll 26s linear infinite; }
+@keyframes slot-scroll { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.slot-pay { display: inline-flex; align-items: center; gap: 2px; padding-right: 22px; white-space: nowrap; }
+.slot-pay__sym { display: inline-block; width: 24px; height: 24px; background: center / contain no-repeat; }
+.slot-pay__x { margin: 0 4px 0 1px; font-size: 12px; color: var(--muted); }
+.slot-pay__amt {
+  font-size: 17px;
+  color: transparent;
+  background: var(--gold-text);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-stroke: .04em var(--ink);
+}
+.slot-marquee {
+  position: relative;
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 13px 12px 12px;
+  border-radius: 20px;
+  background:
+    radial-gradient(90% 120% at 50% 0%, rgba(255, 61, 165, .35), transparent 60%),
+    linear-gradient(180deg, #3D1766 0%, #1E0D36 60%, #12081F 100%);
+  box-shadow:
+    inset 0 0 0 2px #3A1606,
+    inset 0 0 0 4px #F5C542,
+    inset 0 0 0 5.5px #7A4A10,
+    inset 0 8px 18px rgba(255, 233, 166, .12),
+    0 0 26px rgba(255, 61, 165, .28),
+    0 6px 16px rgba(0, 0, 0, .55);
+}
+/* two rows of marquee bulbs (top and bottom edge); the two sets swap brightness */
+.slot-marquee::before, .slot-marquee::after {
+  content: "";
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: -1px;
+  bottom: -1px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, #FFFBEA 0 1.7px, rgba(255, 201, 61, .55) 2.6px, transparent 4.2px) 0 0 / 16px 8px repeat-x,
+    radial-gradient(circle, #FFFBEA 0 1.7px, rgba(255, 201, 61, .55) 2.6px, transparent 4.2px) 0 100% / 16px 8px repeat-x;
+  animation: slot-bulb 1.2s ease-in-out infinite alternate;
+}
+.slot-marquee::after { left: 22px; right: 6px; animation-direction: alternate-reverse; }
+@keyframes slot-bulb { from { opacity: .25; } to { opacity: 1; } }
+
+.slot-marquee__text { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.slot-title { font-size: 34px; line-height: 1; letter-spacing: .02em; white-space: nowrap; }
+.slot-subtitle { margin-top: 3px; font-size: 11px; letter-spacing: .22em; white-space: nowrap; }
+.slot-mini { flex: none; width: 34px; height: 34px; background: center / contain no-repeat; }
+.slot-mini--l { transform: rotate(-12deg); }
+.slot-mini--r { transform: rotate(12deg); }
+.slot.is-small .slot-marquee { padding: 9px 10px 8px; }
+.slot.is-small .slot-title { font-size: 27px; }
+.slot.is-small .slot-subtitle { font-size: 10px; }
+.slot.is-small .slot-mini { width: 28px; height: 28px; }
+
+/* ------------------------------------------------------------------ cabinet and reel window */
+.slot-cab {
+  position: relative;
+  flex: none;
+  padding: 18px 7px 8px;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #FFF3C4 0%, #F5C542 14%, #B8791A 46%, #F0B93A 72%, #8A5410 100%);
+  box-shadow:
+    0 0 0 2px #3A1606,
+    inset 0 2px 0 rgba(255, 255, 255, .6),
+    inset 0 -3px 0 rgba(0, 0, 0, .35),
+    0 12px 26px rgba(0, 0, 0, .6),
+    0 0 34px rgba(122, 60, 255, .38);
+}
+.slot-cab__plaque {
+  position: absolute;
+  left: 50%;
+  top: 2px;
+  transform: translateX(-50%);
+  padding: 1px 12px 0;
+  border-radius: 0 0 8px 8px;
+  font-size: 11px;
+  line-height: 14px;
+  letter-spacing: .18em;
+  white-space: nowrap;
+  color: #4A2300;
+  text-shadow: 0 1px 0 rgba(255, 250, 225, .7);
+}
+.slot.is-small .slot-cab { padding-top: 15px; }
+
+.slot-window {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 3px;
+  padding: 5px 3px;
+  border-radius: 15px;
+  background: linear-gradient(180deg, #170A2A 0%, #0A0414 100%);
+  box-shadow: inset 0 0 0 2px #3A1606, inset 0 3px 12px rgba(0, 0, 0, .95), 0 1px 0 rgba(255, 255, 255, .35);
+  touch-action: none;
+  cursor: grab;
+}
+.slot-window::after {   /* build-up frame (static glow, shown with opacity) */
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: 17px;
+  pointer-events: none;
+  box-shadow: 0 0 0 2px #FFD84A, 0 0 18px rgba(255, 170, 40, .9), inset 0 0 16px rgba(255, 170, 40, .55);
+  opacity: 0;
+  transition: opacity .3s ease-out;
+}
+.slot-window.is-antic::after { opacity: 1; }
+
+.slot-rail { flex: 0 0 9px; display: flex; flex-direction: column; justify-content: space-around; padding: calc(var(--ch) * .35) 0; }
+.slot-rail i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #FF7AC4 35%, #FF3DA5 55%, #5A0632 100%);
+  box-shadow: 0 0 0 1px #2A0618, 0 0 7px rgba(255, 61, 165, .9);
+}
+.slot-rail--r i { background: radial-gradient(circle at 35% 30%, #FFFFFF 0%, #8CF3FF 35%, #29E6FF 55%, #064A5A 100%); box-shadow: 0 0 0 1px #032A33, 0 0 7px rgba(41, 230, 255, .9); }
+
+.slot-reels-wrap { position: relative; flex: 1 1 auto; min-width: 0; transition: transform .22s var(--ease-out); }
+.slot-reels-wrap.is-drag { transition: none; }
+.slot-reels {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 3px;
+  height: calc(var(--ch) * 3.7);
+}
+.slot-reel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 9px;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, .5) 0%, transparent 18%, transparent 82%, rgba(0, 0, 0, .5) 100%),
+    linear-gradient(180deg, #160A28 0%, #2D1850 30%, #3A2063 50%, #2D1850 70%, #160A28 100%);
+  box-shadow: inset 0 0 0 1px rgba(245, 197, 66, .28);
+  contain: layout paint;
+}
+/* cylinder shading; also shades the peek cells above and below the three rows */
+.slot-reel::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(180deg,
+    rgba(6, 2, 12, .72) 0%, rgba(6, 2, 12, .34) 4.5%, rgba(6, 2, 12, .14) 9.5%, transparent 13%,
+    transparent 87%, rgba(6, 2, 12, .14) 90.5%, rgba(6, 2, 12, .34) 95.5%, rgba(6, 2, 12, .72) 100%);
+}
+.slot-reel::before {   /* build-up glow behind the symbols of a slowed reel */
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(70% 55% at 50% 50%, rgba(255, 190, 60, .55), rgba(255, 61, 165, .18) 60%, transparent 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 216, 74, .95), inset 0 0 22px rgba(255, 150, 40, .75);
+  opacity: 0;
+  transition: opacity .25s ease-out;
+}
+.slot-reel.is-antic::before { opacity: .45; }
+.slot-reel.is-hot::before { opacity: 1; animation: slot-hot 1s ease-in-out infinite alternate; }
+@keyframes slot-hot { from { opacity: .6; } to { opacity: 1; } }
+
+.slot-strip { position: absolute; left: 0; right: 0; top: 0; height: 0; z-index: 1; will-change: transform; }
+.slot-cell { position: absolute; left: 0; right: 0; top: 0; height: var(--ch); }
+.slot-sym { position: absolute; inset: 4% 7%; background: center / contain no-repeat; }
+
+/* win emphasis */
+.slot-cell.is-dim .slot-sym { opacity: .3; transition: opacity .25s ease-out; }
+.slot-cell.is-win::before {
+  content: "";
+  position: absolute;
+  inset: 3px 2px;
+  border-radius: 10px;
+  background: radial-gradient(closest-side, rgba(255, 233, 166, .6), rgba(255, 61, 165, .2) 70%, transparent 100%);
+  box-shadow: inset 0 0 0 2px rgba(255, 216, 74, .95), 0 0 10px rgba(255, 216, 74, .6);
+  animation: slot-glow 1.1s ease-in-out infinite alternate;
+}
+.slot-cell.is-win .slot-sym { animation: slot-pop .5s ease-in-out infinite alternate; }
+@keyframes slot-glow { from { opacity: .45; } to { opacity: 1; } }
+@keyframes slot-pop { from { transform: scale(1); } to { transform: scale(1.1); } }
+
+/* one-off warm-up of the symbol images (see view.ts) */
+.slot-warm { position: absolute; left: 0; top: 0; z-index: -1; opacity: .01; pointer-events: none; }
+.slot-warm > div { display: flex; }
+.slot-warm .slot-sym { position: relative; inset: auto; flex: none; }
+
+.slot-lines { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.slot-glass {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  border-radius: 9px;
+  background: linear-gradient(165deg, rgba(255, 255, 255, .13) 0%, rgba(255, 255, 255, .04) 26%, transparent 27%, transparent 100%);
+}
+
+/* ------------------------------------------------------------------ meters */
+.slot-meters { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 2px; }
+.slot-meters .ui-stepper { flex: none; }
+.slot-win { flex: 1 1 auto; min-width: 0; }
+.slot-win .ui-num { transition: opacity .2s ease-out; }
+.slot-win.is-zero .ui-num { opacity: .4; }
+.ui-stepper.is-nudge { animation: slot-nudge .42s ease-in-out; }
+@keyframes slot-nudge {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  45% { transform: translateX(5px); }
+  70% { transform: translateX(-3px); }
+}
+.slot.is-small .slot-meters .ui-plate { min-height: 44px; padding-top: 3px; padding-bottom: 4px; }
+
+/* ------------------------------------------------------------------ controls */
+.slot-controls { flex: none; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.slot-side { display: flex; justify-content: center; min-width: 0; }
+.slot-controls .ui-spin { --d: 104px; }
+.slot.is-small .slot-controls .ui-spin { --d: 86px; }
+.slot-controls .ui-toggle { padding: 0 12px 0 10px; font-size: 14px; }
+.slot.is-small .slot-controls .ui-toggle { padding: 0 9px 0 8px; font-size: 13px; gap: 5px; }
+
+.slot-autobox { position: relative; }
+.slot-autopick {
+  position: absolute;
+  right: -4px;
+  bottom: calc(100% + 12px);
+  z-index: 8;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 9px;
+  border-radius: 18px;
+  background: var(--panel-grad);
+  box-shadow: 0 0 0 1.5px rgba(245, 197, 66, .7), 0 0 0 4px #1A0F2B, 0 10px 26px rgba(0, 0, 0, .7), 0 0 20px rgba(122, 60, 255, .5);
+  animation: slot-pick-in .16s var(--ease-out);
+}
+.slot-autopick__label { font-size: 12px; letter-spacing: .18em; color: var(--gold-1); }
+.slot-autopick__row { display: grid; grid-template-columns: repeat(2, 56px); gap: 6px; }
+.slot-autopick__row .ui-btn { min-width: 0; width: 56px; padding-left: 0; padding-right: 0; }
+@keyframes slot-pick-in { from { transform: translateY(8px) scale(.92); } to { transform: none; } }
+
+.slot-sheet__body { font: 600 15px/1.5 var(--font-ko); color: var(--text); text-align: center; }
+
+/* ------------------------------------------------------------------ plain look (fx off): same DOM, no glow loops */
+:root[data-fx="off"] .slot-marquee::before,
+:root[data-fx="off"] .slot-marquee::after,
+:root[data-fx="off"] .slot-cell.is-win::before,
+:root[data-fx="off"] .slot-cell.is-win .slot-sym,
+:root[data-fx="off"] .slot-reel.is-hot::before,
+:root[data-fx="off"] .slot-pays__track { animation: none; }
+:root[data-fx="off"] .slot-marquee::after { display: none; }
+:root[data-fx="off"] .slot-cab { box-shadow: 0 0 0 2px #3A1606, 0 12px 26px rgba(0, 0, 0, .6); }
+:root[data-fx="off"] .slot-lines .ui-neon-stroke path:nth-child(-n+2) { display: none; }
+:root[data-fx="off"] .slot-cell.is-win::before { background: none; box-shadow: inset 0 0 0 2px rgba(255, 216, 74, .9); opacity: 1; }
+:root[data-fx="off"] .slot-marquee { box-shadow: inset 0 0 0 2px #3A1606, inset 0 0 0 4px #F5C542, inset 0 0 0 5.5px #7A4A10; }
+:root[data-fx="off"] .slot-rail i { box-shadow: 0 0 0 1px #2A0618; }

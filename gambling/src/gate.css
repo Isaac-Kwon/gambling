@@ -1,0 +1,236 @@
+/* Tap-to-enter gate. Loops: transform-only, or opacity with period >= 1s ease-in-out (ARCHITECTURE 2.3). */
+
+.gate {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-top);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: calc(var(--safe-t) + 20px) 16px calc(var(--safe-b) + 24px);
+  cursor: pointer;
+  outline: none;
+  background:
+    radial-gradient(80% 55% at 50% 38%, rgba(122, 60, 255, .55), transparent 70%),
+    radial-gradient(70% 40% at 50% 100%, rgba(255, 61, 165, .35), transparent 70%),
+    linear-gradient(180deg, #1D0B33 0%, #0B0612 60%, #160822 100%);
+  transition: opacity 480ms var(--ease-out), transform 480ms var(--ease-out);
+  touch-action: manipulation;
+}
+.gate.is-leaving { opacity: 0; transform: scale(1.06); pointer-events: none; }
+
+/* rotating light rays behind the logo (transform only) */
+.gate__rays {
+  position: absolute;
+  left: 50%;
+  top: 38%;
+  width: 180vmax;
+  height: 180vmax;
+  margin: -90vmax 0 0 -90vmax;
+  pointer-events: none;
+  opacity: .5;
+  background: repeating-conic-gradient(from 0deg, rgba(255, 233, 166, .16) 0deg 7deg, transparent 7deg 22.5deg);
+  -webkit-mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, .6) 18%, transparent 42%);
+  mask-image: radial-gradient(circle, #000 0%, rgba(0, 0, 0, .6) 18%, transparent 42%);
+  animation: gate-turn 40s linear infinite;
+}
+.gate__halo {
+  position: absolute;
+  left: 50%;
+  top: 36%;
+  width: 360px;
+  height: 360px;
+  margin: -180px 0 0 -180px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 210, 120, .32) 0%, rgba(255, 61, 165, .16) 40%, transparent 70%);
+  animation: gate-breathe 2.6s ease-in-out infinite alternate;
+}
+
+/* drifting coins and gems */
+.gate__float { position: absolute; inset: 0; pointer-events: none; }
+.gate__fl {
+  position: absolute;
+  left: var(--x);
+  bottom: -40px;
+  width: calc(26px * var(--s));
+  height: calc(26px * var(--s));
+  opacity: .5;
+  will-change: transform;
+  animation: gate-rise var(--dur) linear var(--d) infinite;
+}
+.gate__fl-in { display: block; width: 100%; height: 100%; animation: gate-flip 2.2s linear infinite; }
+.gate__fl--coin .gate__fl-in {
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 50%, transparent 0 46%, rgba(106, 58, 6, .55) 47% 54%, transparent 55%), var(--gold-grad);
+  box-shadow: 0 0 0 1.5px #6A3A06, 0 0 12px rgba(245, 197, 66, .55);
+}
+.gate__fl--gem-m .gate__fl-in, .gate__fl--gem-c .gate__fl-in {
+  transform: rotate(45deg) scale(.7);
+  border-radius: 4px;
+  background: linear-gradient(135deg, #FFD0EA, var(--magenta) 50%, #8A0A4E);
+  box-shadow: 0 0 12px rgba(255, 61, 165, .7);
+  animation: gate-gem 3s ease-in-out infinite alternate;
+}
+.gate__fl--gem-c .gate__fl-in { background: linear-gradient(135deg, #DFFCFF, var(--cyan) 50%, #0A6A8A); box-shadow: 0 0 12px rgba(41, 230, 255, .7); }
+
+.gate__sparks { position: absolute; inset: 0; pointer-events: none; }
+.gate__spark {
+  position: absolute;
+  overflow: visible;
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, .8));
+  animation: gate-twinkle 2.2s ease-in-out infinite alternate;
+}
+.gate__spark:nth-child(2n) { animation-duration: 1.7s; }
+.gate__spark:nth-child(3n) { animation-duration: 2.9s; }
+
+/* marquee bulbs along the edges */
+.gate__bulbs { position: absolute; inset: 0; pointer-events: none; }
+.gate__bulbrow { position: absolute; display: flex; justify-content: space-between; }
+.gate__bulbrow--t, .gate__bulbrow--b { left: 14px; right: 14px; height: 10px; }
+.gate__bulbrow--t { top: calc(var(--safe-t) + 6px); }
+.gate__bulbrow--b { bottom: calc(var(--safe-b) + 6px); }
+.gate__bulbrow--l, .gate__bulbrow--r { top: calc(var(--safe-t) + 26px); bottom: calc(var(--safe-b) + 26px); width: 10px; flex-direction: column; }
+.gate__bulbrow--l { left: 6px; }
+.gate__bulbrow--r { right: 6px; }
+.gate__bulb {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #FFFDF0 0 25%, #FFD45A 45%, #C77F12 100%);
+  box-shadow: 0 0 6px 1px rgba(255, 200, 80, .85);
+  animation: gate-bulb 1.4s ease-in-out infinite alternate;
+}
+.gate__bulb--b { animation-delay: -1.4s; }
+
+/* content: brand in the upper area, bonus + call to action in the thumb zone */
+.gate__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  width: 100%;
+  max-width: 380px;
+  height: 100%;
+  padding-bottom: 5vh;
+}
+.gate__brand { flex: 1 1 auto; display: flex; align-items: center; justify-content: center; min-height: 0; }
+.gate .ui-logo--lg { --em: 128px; --word: 54px; }
+
+.gate__bonus {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 8px 26px 10px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(10, 4, 18, .85), rgba(34, 16, 58, .85));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .08),
+    0 0 0 1.5px rgba(245, 197, 66, .75),
+    0 0 0 4px rgba(26, 15, 43, .9),
+    0 0 0 5px rgba(245, 197, 66, .3),
+    0 0 26px rgba(245, 197, 66, .25);
+}
+.gate__bonus-label {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: .22em;
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(41, 230, 255, .8);
+}
+.gate__bonus-row { display: flex; align-items: baseline; gap: 8px; }
+.gate__bonus-unit { font-family: var(--font-display); font-size: 14px; letter-spacing: .12em; color: var(--gold-1); }
+
+.gate__cta {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 248px;
+  min-height: 64px;
+  margin-top: 4px;
+  animation: gate-cta 1.6s ease-in-out infinite;
+}
+.gate__cta-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 999px;
+  border: 2px solid rgba(255, 233, 166, .7);
+  box-shadow: 0 0 14px rgba(255, 61, 165, .7), inset 0 0 10px rgba(255, 61, 165, .5);
+  animation: gate-ring 1.6s ease-in-out infinite;
+}
+.gate__cta-face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 64px;
+  padding: 8px 28px 9px;
+  border-radius: 999px;
+  background: var(--crimson-grad);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, .5),
+    inset 0 -4px 0 rgba(90, 0, 20, .55),
+    0 0 0 2px #4A0010,
+    0 0 0 4px var(--gold-2),
+    0 0 0 5.5px var(--ink),
+    0 8px 0 2px #3A0010,
+    0 12px 28px rgba(0, 0, 0, .6),
+    0 0 34px rgba(255, 45, 85, .55);
+}
+.gate.is-down .gate__cta-face { transform: translateY(3px); }
+.gate__cta-ko {
+  font-size: 21px;
+  font-weight: 900;
+  letter-spacing: .04em;
+  color: #FFF;
+  text-shadow: 0 2px 0 #6A0018, 0 0 12px rgba(255, 200, 220, .6);
+}
+.gate__cta-en {
+  font-family: var(--font-display);
+  font-size: 12px;
+  letter-spacing: .28em;
+  color: var(--gold-1);
+  margin-right: -.28em;
+}
+
+@media (max-height: 700px) {
+  .gate__body { gap: 14px; padding-bottom: 2vh; }
+  .gate .ui-logo--lg { --em: 100px; --word: 46px; --sub: 15px; }
+  .gate .ui-logo__slogan { margin-top: 10px; font-size: 13px; }
+}
+@media (max-height: 600px) {
+  .gate__body { gap: 12px; padding-bottom: 0; }
+  .gate .ui-logo--lg { --em: 84px; --word: 40px; --sub: 14px; }
+  .gate__cta, .gate__cta-face { min-height: 56px; }
+}
+
+/* fx=off: same DOM, plain look */
+:root[data-fx="off"] .gate__rays,
+:root[data-fx="off"] .gate__halo,
+:root[data-fx="off"] .gate__float,
+:root[data-fx="off"] .gate__sparks { display: none; }
+:root[data-fx="off"] .gate__bulb,
+:root[data-fx="off"] .gate__cta,
+:root[data-fx="off"] .gate__cta-ring { animation: none; }
+:root[data-fx="off"] .gate__cta-ring { display: none; }
+
+@keyframes gate-turn { to { transform: rotate(360deg); } }
+@keyframes gate-breathe { from { opacity: .55; } to { opacity: 1; } }
+@keyframes gate-rise {
+  from { transform: translateY(0); }
+  to { transform: translateY(-115vh); }
+}
+@keyframes gate-flip { to { transform: rotateY(360deg); } }
+@keyframes gate-gem { from { transform: rotate(45deg) scale(.6); } to { transform: rotate(135deg) scale(.85); } }
+@keyframes gate-twinkle { from { transform: scale(.4) rotate(0deg); } to { transform: scale(1.15) rotate(45deg); } }
+@keyframes gate-bulb { from { opacity: .3; } to { opacity: 1; } }
+@keyframes gate-cta { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.045); } }
+@keyframes gate-ring {
+  0% { transform: scale(.97); opacity: .9; }
+  100% { transform: scale(1.16); opacity: 0; }
+}

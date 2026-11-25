@@ -3,15 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0b0612" />
+    <meta name="theme-color" content="#0B0612" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="네온 불빛 아래 펼쳐지는 슬롯, 룰렛, 블랙잭, 크래시. 지금 오로벨에서 잭팟의 주인공이 되세요!" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="오로벨" />
+    <meta name="format-detection" content="telephone=no" />
+    <link rel="icon" type="image/svg+xml" href="/icons/icon.svg" />
     <title>오로벨 카지노</title>
     <style>
-      html, body { margin: 0; height: 100%; background: #0b0612; color: #f5d06f; font-family: system-ui, sans-serif; }
-      #app { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+      html, body { margin: 0; height: 100%; background: #0B0612; }
     </style>
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Layers inside #frame, bottom to top: screen (HUD + route root) → #gfx → #fx-dom → sheets/modals → gate/receipt → rotate cover. -->
+    <div id="frame">
+      <div id="screen">
+        <header id="hud"></header>
+        <main id="app"></main>
+      </div>
+      <div id="gfx" aria-hidden="true"></div>
+      <div id="fx-dom" aria-hidden="true"></div>
+    </div>
     <script type="module" src="/gambling/src/main.ts"></script>
   </body>
 </html>

@@ -1,19 +1,28 @@
 import { START_CREDITS, type GameId, type SlotVariant } from "../../shared/config";
 import type { Lang } from "../../shared/i18n";
+import { createRng } from "../../shared/rng";
+import { createFx, createNullFx, nullBackend } from "../fx/index";
 import type { Fx, FxRecord, FxRun } from "../fx/types";
 import { createManualClock, type ManualClock } from "../src/clock";
 import type { Env } from "../src/env";
 import { createSession, type SessionRuntime } from "../src/session";
 import type { GameCtx } from "../src/types";
 
+/**
+ * fx of a headless run (ARCHITECTURE §4.7, §11.1): "on" is the real director (`createFx`) over `nullBackend`
+ * (decisions, presentation-stream draws and records happen as in the browser; nothing is drawn, no Pixi, no
+ * DOM), "off" is `createNullFx()`. The fx presentation stream is the sequential `pre:fx` stream of the seed.
+ */
+export function createHeadlessFx(o: { fx: "on" | "off"; seed: string; clock: ManualClock; reducedMotion?: boolean }): Fx {
+  if (o.fx === "off") return createNullFx();
+  return createFx({ backend: nullBackend, clock: o.clock, pre: createRng(o.seed, "pre:fx"), reducedMotion: o.reducedMotion });
+}
+
 const DONE: FxRun = { done: Promise.resolve(), skip: () => undefined };
 
 /**
- * TODO(fx): replace this with the real thing once gambling/fx/index.ts and null.ts exist:
- * fx "on"  -> createFx({ backend: nullBackend, clock, pre: rng.pre("fx"), guard, quality })
- * fx "off" -> createNullFx()
- * Until then: no DOM, consumes no randomness; the "on" stub records one record per celebration so that
- * "on has records, off has none" can be asserted.
+ * Minimal fx stub for runtime unit tests that only need "records exist when on" (session.test.ts):
+ * no DOM, consumes no randomness, one record per celebration. Headless game runs use `createHeadlessFx`.
  */
 export function createStubFx(enabled: boolean): Fx {
   let into: FxRecord[] | null = null;
@@ -70,7 +79,7 @@ export interface HeadlessCtx {
 export function createHeadlessCtx(o: HeadlessOpts): HeadlessCtx {
   const clock = createManualClock(0);
   const base = o.startEpoch ?? 1_700_000_000_000;
-  const fx = o.fxImpl ?? createStubFx(o.fx === "on");
+  const fx = o.fxImpl ?? createHeadlessFx({ fx: o.fx, seed: o.seed, clock });
   const rt = createSession({
     seed: o.seed, mode: "class", fx, fxMode: o.fx, sv: o.sv ?? "a", lang: o.lang ?? "en",
     env: HEADLESS_ENV, clock, epoch: () => base + clock.now(), storage: null,

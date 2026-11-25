@@ -24,6 +24,8 @@ function copy404(): Plugin {
 export default defineConfig({
   // Local dev: "/". CI sets BASE_PATH=/gambling/.
   base: process.env.BASE_PATH ?? '/',
+  // Pixi is lazy-imported after the gate tap; pre-bundle it so dev mode doesn't 504 on first load.
+  optimizeDeps: { include: ['pixi.js'] },
   resolve: {
     alias: {
       '@shared': r('./shared'),

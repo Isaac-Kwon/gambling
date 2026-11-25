@@ -1,0 +1,15 @@
+{
+  "slot.auto": "AUTO",
+  "slot.bet": "BET",
+  "slot.lines": "20 LINES",
+  "slot.short.body": "ORO SEVENS 최소 베팅은 {min} 크레딧입니다.",
+  "slot.short.cashout": "CASH OUT",
+  "slot.short.lobby": "로비",
+  "slot.short.title": "크레딧 부족",
+  "slot.spin": "SPIN",
+  "slot.stop": "STOP",
+  "slot.sub": "LUCKY 7 · WILD STAR",
+  "slot.title": "ORO SEVENS",
+  "slot.turbo": "TURBO",
+  "slot.win": "WIN"
+}

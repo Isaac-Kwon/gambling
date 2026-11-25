@@ -6,6 +6,7 @@
  */
 import './gate.css';
 import { t } from '../../shared/i18n.gambling';
+import { noticePurpose } from './notice';
 import { h, logo, num, sparkle, svgRoot } from './ui';
 
 export interface GateOptions {
@@ -79,7 +80,7 @@ export function mountGate(o: GateOptions): Gate {
     floaters(),
     sparks,
     bulbs(),
-    h('div', 'gate__body', [h('div', 'gate__brand', [logo({ size: 'lg', ko: true, slogan: true })]), bonus, cta]),
+    h('div', 'gate__body', [h('div', 'gate__brand', [logo({ size: 'lg', ko: true, slogan: true })]), bonus, cta, noticePurpose()]),
   ]);
   el.dataset.testid = 'gate';
   el.setAttribute('role', 'button');

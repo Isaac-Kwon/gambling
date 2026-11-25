@@ -2,6 +2,7 @@
 import { registerSW } from 'virtual:pwa-register';
 import './style.css';
 import { getLang, pickLang, setLang } from '@shared/i18n';
+import { blockPinchZoom } from '@shared/nozoom';
 import { t } from '@shared/i18n.understanding';
 import { createChartKit, type ChartKit } from './charts/kit';
 import { createSimClient } from './sim';
@@ -81,6 +82,20 @@ function header(source: Source): HTMLElement {
   return h;
 }
 
+/** Link back to the game lobby (site base): a new session starts there. */
+function backLink(testid: string): HTMLAnchorElement {
+  const a = el('a', 'page-back', t('app.back'));
+  a.href = import.meta.env.BASE_URL;
+  a.dataset.testid = testid;
+  return a;
+}
+
+function footer(): HTMLElement {
+  const f = el('footer', 'page-foot');
+  f.append(backLink('back-to-game-foot'));
+  return f;
+}
+
 function noData(): HTMLElement {
   const box = el('section', 'card nodata');
   box.dataset.testid = 'nodata';
@@ -143,9 +158,9 @@ function show(source: Source): void {
   app.replaceChildren();
   window.scrollTo(0, 0);
   const wrap = el('div', 'page');
-  wrap.append(header(source));
+  wrap.append(backLink('back-to-game'), header(source));
   if (source.kind === 'none') {
-    wrap.append(noData());
+    wrap.append(noData(), footer());
     app.append(wrap);
     return;
   }
@@ -162,7 +177,7 @@ function show(source: Source): void {
     main.append(s);
     holders.set(id, body);
   }
-  wrap.append(toc.nav, main, el('footer', 'page-foot'));
+  wrap.append(toc.nav, main, footer());
   app.append(wrap);
   toc.setCurrent(SECTION_IDS[0]);
 
@@ -213,6 +228,7 @@ function show(source: Source): void {
 }
 
 async function boot(): Promise<void> {
+  blockPinchZoom();
   initLang();
   charts = createChartKit(t('app.chart.empty'));
   const hash = location.hash;

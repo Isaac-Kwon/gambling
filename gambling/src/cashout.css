@@ -117,7 +117,7 @@
 .tk__thanks { font-family: var(--font-display); font-size: 12px; letter-spacing: .16em; color: #7A5A20; }
 
 /* ---- actions (revealed once the ticket is printed) */
-.tk__actions { opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 360ms ease-out, transform 360ms ease-out; }
+.tk__actions { display: flex; flex-direction: column; gap: 10px; opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 360ms ease-out, transform 360ms ease-out; }
 .tk.is-done .tk__actions { opacity: 1; pointer-events: auto; transform: none; }
 
 /* ---- print animation (fx on): the paper feeds out of the slot in steps, like a thermal printer */

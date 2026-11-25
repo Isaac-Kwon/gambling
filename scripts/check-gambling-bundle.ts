@@ -28,6 +28,11 @@ export interface Rules {
   allowHttps?: boolean;
   /** Skip the forbidden-word list (used for URL-only scans). */
   skipWords?: boolean;
+  /**
+   * Exact phrases exempt from the forbidden-word list (the purpose / problem-gambling notice, see
+   * NOTICE_GLOB). Each occurrence is blanked before the word scan; URL and API checks still see it.
+   */
+  allowPhrases?: string[];
   forbiddenApis: boolean;
 }
 
@@ -77,6 +82,39 @@ const lineOf = (text: string, index: number): number => {
   return n;
 };
 
+/** Every occurrence of each phrase (exact text, or as a JS/JSON string body) replaced by spaces of equal length. */
+export function blankPhrases(text: string, phrases: readonly string[]): string {
+  let out = text;
+  for (const p of phrases) {
+    if (!p) continue;
+    const json = JSON.stringify(p).slice(1, -1);
+    const esc = (upper: boolean) => json.replace(/[\u007f-￿]/g, (c) => {
+      const hex = c.charCodeAt(0).toString(16).padStart(4, '0');
+      return '\\u' + (upper ? hex.toUpperCase() : hex);
+    });
+    const forms = new Set([p, json, p.replace(/'/g, "\\'"), esc(false), esc(true)]);
+    for (const f of forms) out = out.split(f).join(' '.repeat(f.length));
+  }
+  return out;
+}
+
+/** Where the allow-listed notice strings live (gambling/src/notice.ts reads only this namespace). */
+export const NOTICE_DIR = 'i18n/gambling';
+export const NOTICE_FILE_RE = /^notice\.(ko|en|it)\.json$/;
+
+/** All values of i18n/gambling/notice.<lang>.json under `root`. */
+export function noticePhrases(root: string): string[] {
+  const dir = join(root, NOTICE_DIR);
+  if (!existsSync(dir)) return [];
+  const out: string[] = [];
+  for (const n of readdirSync(dir)) {
+    if (!NOTICE_FILE_RE.test(n)) continue;
+    const d = JSON.parse(readFileSync(join(dir, n), 'utf8')) as Record<string, unknown>;
+    for (const v of Object.values(d)) if (typeof v === 'string' && v) out.push(v);
+  }
+  return out;
+}
+
 export function defaultRules(over: Partial<Rules> = {}): Rules {
   return {
     words: WORD_RULES,
@@ -93,8 +131,9 @@ export function scanText(text: string, rules: Rules): ScanResult {
     violations.push({ rule, match, index, line: lineOf(text, index) });
 
   if (!rules.skipWords) {
+    const wordText = blankPhrases(text, rules.allowPhrases ?? []);
     for (const w of rules.words) {
-      for (const m of text.matchAll(new RegExp(w.re.source, w.re.flags.includes('g') ? w.re.flags : w.re.flags + 'g'))) {
+      for (const m of wordText.matchAll(new RegExp(w.re.source, w.re.flags.includes('g') ? w.re.flags : w.re.flags + 'g'))) {
         add(w.name, m[0], m.index ?? 0);
       }
     }
@@ -447,10 +486,11 @@ export function checkDist(opts: CheckOptions): Report {
   if (!existsSync(join(dist, 'manifest.webmanifest'))) report.notes.push('manifest.webmanifest not present: skipped');
 
   let understandingTotal = 0;
+  const allowPhrases = noticePhrases(opts.root);
   for (const [f, mode] of targets) {
     const text = read(f).toString('utf8');
     report.filesScanned.push(f);
-    const res = scanText(text, defaultRules({ understanding: mode, forbiddenApis: false }));
+    const res = scanText(text, defaultRules({ understanding: mode, forbiddenApis: false, allowPhrases }));
     for (const v of res.violations) fail(f, v.rule, `"${v.match}" at line ${v.line}`);
     if (mode === 'count') understandingTotal += res.understandingCount;
   }

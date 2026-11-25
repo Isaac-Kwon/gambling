@@ -71,3 +71,7 @@
 - 2026-11-25 [e2e] Playwright: iPhone 13(WebKit)·Pixel 7(Chromium), `BASE_PATH=/gambling/` 빌드를 `dist-e2e`(EPERM 시 임시 폴더)에서 `vite preview`; 기대값은 `shared/rules`로 재계산, 모든 테스트에서 외부 요청·페이지 오류·console.error를 실패로 — §11.4 12개 시나리오
 - 2026-11-25 [e2e] 스크린샷은 기준 이미지가 아닌 첨부물(레이아웃은 단언으로 검사), 서비스 워커는 시나리오 8에서만 허용, 시나리오 8은 WebKit에서 건너뜀(setOffline이 SW 탐색에 적용되지 않음) — 엔진별 글꼴·글로우 차이, 결정성
 - 2026-11-25 [e2e] CI의 e2e 잡은 배포와 분리된 비차단 잡 — 리눅스 러너에서 안정성이 확인되면 배포 조건으로 올린다
+- 2026-11-25 [user] 두 손가락 확대 금지(gambling, understanding 모두): viewport `maximum-scale=1, user-scalable=no`, `touch-action: pan-x pan-y`, iOS `gesture*`와 다중 터치 `touchmove` 취소(`shared/nozoom.ts`) — CONTEXT §6.2의 "understanding은 막지 않음"을 뒤집음
+- 2026-11-25 [user] 로비 독의 사운드 버튼을 톱니바퀴 설정 버튼으로 교체, 설정 시트에 언어와 사운드 — 언어는 새로고침 없이 로비와 HUD를 다시 그림(세션 유지), `eg.lang` 저장, `?lang=` 제거, `aux("lang")` 기록
+- 2026-11-25 [user] 진입 화면, 로비 하단, 설정 시트에 제작 목적("도박 중독 방지 교육용 목적으로 제작되었습니다.")과 도박 중독 경고, 1336 표시 — CONTEXT §2.1 "교육 느낌 없음"의 예외; 번들 금지어 검사는 `notice.*.json` 문구만 정확히 허용(단어 목록은 그대로)
+- 2026-11-25 [user] 정산 화면에 "게임으로 돌아가기"(같은 쿼리로 로비 재진입 → 새 세션), understanding 상단과 하단에 같은 링크 — §8 "다시 하기" 미결 해소. 새 세션이 시작되면 이전 세션 기록(`eg.session.v1`)은 덮어씀

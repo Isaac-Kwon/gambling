@@ -5,7 +5,7 @@ import type { Ev, Session } from '../../shared/schema';
 import { createStubFx, HEADLESS_ENV } from '../harness/ctx';
 import { createManualClock } from './clock';
 import { OCEAN_STATE_KEY, createSession } from './session';
-import { buildReceipt, detailUrl, fmtPlayTime, goToDetail, ticketMarks } from './cashout';
+import { againUrl, buildReceipt, detailUrl, fmtPlayTime, goToDetail, ticketMarks } from './cashout';
 
 const T0 = 1_700_000_000_000;
 
@@ -136,5 +136,14 @@ describe('session end reasons', () => {
     expect(s.endReason).toBe('cashout');
     const d = buildReceipt(s, rt.wallet.balance);
     expect(d).toMatchObject({ reason: 'cashout', finalCredits: 10_900, bonus: 1000, games: [{ id: 'slot', rounds: 1 }] });
+  });
+});
+
+describe('againUrl', () => {
+  it('goes to the lobby with the same query and no hash', () => {
+    expect(againUrl('/gambling/', '?seed=abc&fx=off')).toBe('/gambling/?seed=abc&fx=off');
+    expect(againUrl('/gambling', '')).toBe('/gambling/');
+    expect(againUrl('/', '?')).toBe('/');
+    expect(againUrl('/', 'lang=en')).toBe('/?lang=en');
   });
 });

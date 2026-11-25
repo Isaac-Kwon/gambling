@@ -1,0 +1,42 @@
+/* Settings sheet (settings.ts). */
+.st { display: flex; flex-direction: column; gap: 14px; padding-bottom: 4px; }
+.st-row { display: flex; flex-direction: column; gap: 8px; }
+.st-row__label {
+  font-family: var(--font-ko);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: .02em;
+  color: var(--muted);
+}
+.st-seg {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 14px;
+  background: rgba(0, 0, 0, .42);
+  box-shadow: inset 0 0 0 1px rgba(245, 197, 66, .35);
+}
+.st-seg__btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  font-family: var(--font-ko);
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--muted);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: background-color 120ms ease, color 120ms ease;
+}
+.st-seg__btn.is-down { transform: translateY(1px); }
+.st-seg__btn[aria-pressed="true"] {
+  color: #4A2300;
+  background: var(--gold-grad);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .7), 0 0 0 1.5px var(--ink);
+}
+.st-seg__btn:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
+.st .notice { margin-top: 4px; }

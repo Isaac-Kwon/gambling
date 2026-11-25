@@ -3,7 +3,8 @@
  * in the game's own casino style (a thermal-paper ticket printed out of a slot). It shows four facts only:
  * final credits, play time, biggest single win and the games played, plus a "BONUS PAYOUT" line when the ocean
  * queue was paid out at the end. One button hands the player on to the detail page, carrying the summary
- * in the URL hash (the full log travels through localStorage). There is no "play again".
+ * in the URL hash (the full log travels through localStorage). A second button goes back to the game: it reloads
+ * the lobby with the same query (seed / fx / sv / lang), which shows the gate and starts a new session.
  *
  * The data side (`buildReceipt`, `detailUrl`, `goToDetail`) is pure/injectable so node tests cover it.
  */
@@ -71,6 +72,12 @@ export function ticketMarks(rng: Rng): { serial: string; bars: number[] } {
   const bars: number[] = [];
   for (let i = 0; i < 46; i++) bars.push(1 + rng.int(4));
   return { serial, bars };
+}
+
+/** Lobby URL for a new session: `<base>` + the current query (keeps ?seed= / ?fx= / ?sv= / ?lang=), no hash. */
+export function againUrl(base: string, search: string): string {
+  const b = base.endsWith('/') ? base : base + '/';
+  return b + (search && search !== '?' ? (search.startsWith('?') ? search : '?' + search) : '');
 }
 
 /** `<base>` + detail page + `#s=<summary>`; `base` is `import.meta.env.BASE_URL`. */
@@ -168,7 +175,17 @@ export function mountReceipt(host: HTMLElement, o: ReceiptOptions): HTMLElement 
       }).catch(() => { busy = false; detail.disabled = false; });
     },
   });
-  const actions = h('div', 'tk__actions', [detail]);
+  const again = button({
+    label: t('cashout.again'), variant: 'dark', size: 'md', block: true, testid: 'btn-again',
+    onTap: () => {
+      if (busy) return;
+      busy = true;
+      again.disabled = true;
+      try { o.save(); } catch { /* the finished log is already saved by finish() */ }
+      (o.navigate ?? ((u) => location.assign(u)))(againUrl(o.base ?? import.meta.env.BASE_URL, location.search));
+    },
+  });
+  const actions = h('div', 'tk__actions', [detail, again]);
 
   const el = h('div', 'tk', [h('div', 'tk__scrim'), h('div', 'tk__col', [printer, actions])]);
   el.dataset.testid = 'receipt';

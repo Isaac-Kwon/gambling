@@ -1,0 +1,31 @@
+/* Purpose + problem-gambling notice (notice.ts). Plain, readable, no glow. */
+.notice {
+  margin: 18px 0 4px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 246, 224, .18);
+  background: rgba(11, 6, 18, .72);
+  font-family: var(--font-ko);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: rgba(255, 246, 224, .78);
+  text-align: left;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.notice p { margin: 0; }
+.notice p + p { margin-top: 6px; }
+.notice__purpose { font-weight: 800; font-size: 13.5px; color: #FFF6E0; }
+.notice__help { font-weight: 700; color: var(--gold-1); }
+
+.notice-purpose {
+  margin: 0;
+  padding: 0 16px;
+  font-family: var(--font-ko);
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.45;
+  color: rgba(255, 246, 224, .82);
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+}

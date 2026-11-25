@@ -46,7 +46,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; touch-action: pan-x pan-y; /* no pinch / double-tap zoom */ }
 @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
 body {
   margin: 0;
@@ -62,6 +62,14 @@ body {
 
 /* ---------- header ---------- */
 .page-head { padding: 56px 0 28px; max-width: var(--measure); }
+.page-back {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 44px; margin: 12px 0 0;
+  font-size: 0.9375rem; font-weight: 600; text-decoration: none;
+}
+.page-back::before { content: ""; width: 8px; height: 8px; border: solid currentColor; border-width: 0 0 1.5px 1.5px; transform: rotate(45deg); }
+.page-back + .page-head { padding-top: 20px; }
+.page-foot { padding-top: 48px; }
+.page-foot .page-back { margin: 0; }
 .page-title { margin: 0 0 12px; font-size: 1.75rem; line-height: 1.25; font-weight: 600; letter-spacing: -0.01em; }
 .lede { margin: 0; color: var(--ink-2); font-size: 1.0625rem; }
 .badge {

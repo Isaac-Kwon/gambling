@@ -10,13 +10,16 @@
  */
 import './lobby.css';
 import type { GameId } from '../../shared/config';
+import type { Lang } from '../../shared/i18n';
 import { t } from '../../shared/i18n.gambling';
 import type { Rng } from '../../shared/rng';
 import type { Fx } from '../fx/types';
 import { mountInstall } from './install';
+import { noticeBlock } from './notice';
+import { openSettings } from './settings';
 import type { SessionRuntime } from './session';
 import type { Clock } from './types';
-import { chipArt, fmtCredits, goldText, h, icon, iconButton, logo, pill, pressable, ribbon, starPath, svgRoot, s } from './ui';
+import { chipArt, fmtCredits, goldText, h, icon, iconButton, logo, pill, pressable, ribbon, starPath, svgRoot, s, type Overlay } from './ui';
 
 export interface LobbyOptions {
   rt: SessionRuntime;
@@ -25,6 +28,8 @@ export interface LobbyOptions {
   fxOn: boolean;
   /** Navigate to a game (the router handles deferral / logging). */
   go(id: GameId): void;
+  /** The language was changed in settings (the lobby re-renders itself; the caller updates the HUD). */
+  onLang?(lang: Lang): void;
 }
 
 // ================================================================== presentation-stream content (pure)
@@ -316,7 +321,25 @@ function gameCard(id: Exclude<GameId, 'ocean'>, art: HTMLElement): Card {
 
 let ambientStarted = false;
 
+/**
+ * Mounts the lobby. A language change in the settings sheet tears the lobby down and draws it again in the
+ * new language, then reopens the sheet; the returned cleanup always removes whichever copy is current.
+ */
 export function mountLobby(root: HTMLElement, o: LobbyOptions): () => void {
+  let current: () => void = () => undefined;
+  let sheet: Overlay | null = null;
+  const settings = (): void => { sheet = openSettings({ rt: o.rt, fx: o.fx, onLang: relang }); };
+  const relang = (lang: Lang): void => {
+    o.onLang?.(lang);
+    current();
+    current = renderLobby(root, o, settings);
+    settings();
+  };
+  current = renderLobby(root, o, settings);
+  return () => { sheet?.close(); current(); };
+}
+
+function renderLobby(root: HTMLElement, o: LobbyOptions, settings: () => void): () => void {
   const { rt, fx, clock } = o;
   const cleanups: (() => void)[] = [];
   let alive = true;
@@ -369,7 +392,7 @@ export function mountLobby(root: HTMLElement, o: LobbyOptions): () => void {
   const arcade = h('section', 'lb__sec lb__sec--arcade', [h('div', 'lb__sec-head', [ribbon(t('lobby.section.arcade'), { tone: 'violet' })]), cab.el]);
   arcade.id = 'lb-arcade';
 
-  const scroll = h('div', 'lb__scroll', [head, ticker, casino, arcade]);
+  const scroll = h('div', 'lb__scroll', [head, ticker, casino, arcade, noticeBlock({ testid: 'lobby-notice' })]);
 
   // ---- dock (thumb zone)
   const tab = (key: string, ic: 'grid' | 'crown', target: HTMLElement) => {
@@ -384,16 +407,15 @@ export function mountLobby(root: HTMLElement, o: LobbyOptions): () => void {
   };
   const tCasino = tab('lobby.dock.casino', 'grid', casino);
   const tArcade = tab('lobby.dock.arcade', 'crown', arcade);
-  const sound = iconButton({ icon: rt.settings.muted ? 'mute' : 'sound', aria: t('lobby.dock.sound'), testid: 'btn-sound', variant: 'dark' });
-  sound.addEventListener('click', () => {
-    rt.settings.muted = !rt.settings.muted;
-    sound.querySelector('.ui-ibtn__face')!.replaceChildren(icon(rt.settings.muted ? 'mute' : 'sound', 22));
-    sound.setAttribute('aria-pressed', String(rt.settings.muted));
+  const gear = iconButton({ icon: 'gear', aria: t('settings.open'), testid: 'btn-settings', variant: 'dark' });
+  gear.addEventListener('click', () => {
+    try { fx.sfx.play('tap'); } catch { /* ignore */ }
+    settings();
   });
   const installSlot = h('div', 'lb-dock__slot');
   installSlot.dataset.slot = 'install'; // install.ts mounts the install button / iOS tip here
   installSlot.hidden = true;
-  const dock = h('nav', 'lb-dock', [tCasino, tArcade, installSlot, sound]);
+  const dock = h('nav', 'lb-dock', [tCasino, tArcade, installSlot, gear]);
   cleanups.push(mountInstall(installSlot));
 
   const lobby = h('div', 'lb', [scroll, dock]);

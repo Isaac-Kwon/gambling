@@ -40,7 +40,7 @@
  *   pill('HOT', 'hot')                                       badges: hot | gold | cyan | violet | win
  *   chip({ value: 100, onTap, selected: true })              casino chip (button when onTap); .select(on)
  *   chipArt(value) / chipColors(value) / chipLabel(1000) → "1K"
- *   icon('sound' | 'mute' | 'bolt' | 'loop' | 'close' | 'plus' | 'minus' | 'back' | 'coin' | 'star' | 'crown' | 'grid')
+ *   icon('sound' | 'mute' | 'bolt' | 'loop' | 'close' | 'plus' | 'minus' | 'back' | 'coin' | 'star' | 'crown' | 'grid' | 'gear')
  *
  * ── Panels & overlays ──────────────────────────────────────────────────────────────────────────
  *   ribbon('카지노관', { tone: 'red' | 'violet' | 'gold' })     section / panel title

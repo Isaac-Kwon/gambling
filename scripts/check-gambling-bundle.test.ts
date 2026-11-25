@@ -2,12 +2,14 @@ import { describe, expect, it } from 'vitest';
 import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import {
+  blankPhrases,
   collectGraph,
   computeBudget,
   defaultRules,
   filesOf,
   findBoundaryViolations,
   findEntry,
+  noticePhrases,
   pixiInfo,
   scanSourceBoundaries,
   scanText,
@@ -245,5 +247,40 @@ describe('import boundaries (real repo)', () => {
   it('has no violations', () => {
     const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
     expect(scanSourceBoundaries(root)).toEqual([]);
+  });
+});
+
+describe('notice allow-list', () => {
+  const root = resolve(fileURLToPath(new URL('.', import.meta.url)), '..');
+  const phrases = noticePhrases(root);
+
+  it('loads every value of i18n/gambling/notice.<lang>.json', () => {
+    expect(phrases.length).toBeGreaterThanOrEqual(12);
+    expect(phrases).toContain('도박 중독 방지 교육용 목적으로 제작되었습니다.');
+  });
+
+  it('blanks exact phrases only, keeping offsets', () => {
+    const text = 'a="도박 중독 방지 교육용 목적으로 제작되었습니다.";b="도박"';
+    const out = blankPhrases(text, phrases);
+    expect(out.length).toBe(text.length);
+    expect(hits(text, { understanding: 'exempt', allowPhrases: phrases })).toEqual(['도박']);
+  });
+
+  it('matches the \\u-escaped and quote-escaped forms of a phrase', () => {
+    const p = "it's 도박";
+    const quoted = String.raw`x='it\'s 도박'`;
+    expect(blankPhrases(quoted, [p])).not.toContain('도박');
+    for (const escaped of [String.raw`x="it's 도박"`, String.raw`x="it's 도박"`]) {
+      const out = blankPhrases(escaped, [p]);
+      expect(out.length).toBe(escaped.length);
+      expect(out).not.toMatch(/\\u/i);
+    }
+    expect(hits('x="도박"', { understanding: 'exempt', allowPhrases: [p] })).toEqual(['도박']);
+  });
+
+  it('every notice phrase passes the word scan with the allow-list and fails without it', () => {
+    const blob = phrases.map((p) => JSON.stringify(p)).join(',');
+    expect(hits(blob, { understanding: 'exempt', allowPhrases: phrases })).toEqual([]);
+    expect(hits(blob, { understanding: 'exempt' }).length).toBeGreaterThan(0);
   });
 });

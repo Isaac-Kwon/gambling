@@ -61,6 +61,7 @@
 
 ### 1.3 금지어 (대소문자 무시, 별도 표기 제외)
 - BASE_PROMPT 목록: `교육`, `중독`, `하우스 엣지`, `house edge`, `near-miss`, `니어미스`, `LDW`(대소문자 구분, 단어 경계), `1336`(앞뒤가 숫자·소수점이 아닐 때), `바다이야기`, `understanding`(아래 특례).
+- **허용 문구 (2026-11-25):** `i18n/gambling/notice.{ko,en,it}.json`의 값(제작 목적, 도박 중독 경고, 1336 안내)은 정확히 그 문자열일 때만 금지어 검사에서 뺀다(`noticePhrases` → `scanText`의 `allowPhrases`; 원문, JSON 이스케이프, `\uXXXX` 형태). 다른 곳에 같은 단어가 나오면 여전히 실패한다.
 - 추가: `하우스엣지`, `houseEdge`, `near miss`, `nearMiss`, `도박`, `예방`, `치유`, `오개념`, `기댓값`, `퀴즈`, `해설`, `실험`, `educat`, `addict`, `helpline`, `fallacy`, `debrief`, `disguised`, `RTP`(대소문자 구분, 단어 경계).
 - **`understanding` 특례:** gambling 그래프의 JS 전체에서 등장 횟수가 **1회 이하**이고, 그 1회는 바로 뒤에 `/`가 붙은 형태(`understanding/`)여야 한다. 이 문자열은 `gambling/src/cashout.ts`의 `const DETAIL_PATH = 'understanding/'` 한 곳에만 둔다. HTML과 매니페스트에서는 0회.
 - 외부 요청 검사: gambling 산출물과 understanding 산출물 모두에서 `https?://`를 찾고, 허용 목록(`http://www.w3.org/`로 시작하는 XML 네임스페이스, understanding의 출처 링크, **Pixi 청크 안의 `http://www.pixijs.com/`** — 콘솔 인사말용 문자열이며 `hello: false`라 출력도 요청도 없다. 2026-11-24 빌드 실측에서 Pixi 청크의 URL은 이것뿐이고 금지어는 0건)에 없으면 실패.
@@ -514,7 +515,7 @@ export interface GameStore { get<T>(key: string): T | undefined; set(key: string
 - **게이트(탭해서 시작):** 페이지를 열 때마다 라우터 위에 덮는다. 로고, 슬로건, `터치하여 입장`. `pointerup` 핸들러 안에서 `fx.sfx.unlock()`을 부르고 세션을 시작(또는 이어하기)한 뒤 `nav("gate")` → `nav("lobby")`. fx=on이면 이어서 `void loadGfx(...)`로 Pixi 계층 로드를 시작한다(기다리지 않는다, §4.3). 브라우저 모드에서 `requestFullscreen()`은 부르지 않는다.
 - **이어하기:** `session.ts`가 저장할 때마다 `eg.rt.v1`에 `{id, balance, rounds, xp, store}`를 함께 쓴다. 페이지를 열었을 때 `endedAt`이 없는 세션이 있고 `startedAt`이 6시간 이내이며 `?seed=`가 없거나 같고 **현재 주소의 `fx`·`sv` 값이 저장된 세션과 같으면** 그 세션을 이어 간다(`aux("resume")`). 다르면 새 세션이다(한 세션 안에서 변형이나 연출 모드가 섞이지 않게 한다). 진행 중이던 판은 무효이고 잔고는 마지막 정산 값이다. 라운드 난수가 카운터 기반이라 같은 번호의 판은 같은 결과가 다시 나온다. `endedAt`이 있는 세션만 남아 있으면 새 세션을 만든다(첫 정산 때 덮어쓴다).
 - **백그라운드:** `visibilitychange` hidden → `clock.pause()`, `fx.suspend()`(AudioContext suspend, Pixi 계층 루프 정지), 오토 스핀 취소(돌아와도 자동으로 재개하지 않는다), `logger.save()`, `aux("bg")`. visible → `clock.resume()`, `fx.resume()`, `aux("fg")`. iOS에서 오디오가 다시 잠기면 다음 `pointerdown`에서 `unlock()`을 다시 부른다.
-- **정산:** HUD의 CASH OUT은 항상 보인다. 판이 진행 중이면 눌린 상태로 두었다가 정산 뒤에 연다. 순서: 현재 게임 `unmount` → **`flushOcean()`(§6.2. 큐에 남은 금액을 `Ev` 하나로 지급. bust 경로에서는 이미 지급했으므로 아무 일도 없다)** → `logger.end(reason)` → `encodeSummary` → 영수증 덮개(브랜드 머리말, `CASH OUT TICKET`, 최종 크레딧, 플레이 시간 mm:ss, 최고 당첨, 플레이한 게임과 판 수, 일괄 지급이 있었으면 "심해전설 BONUS +N" 한 줄) → 버튼 하나 **"상세 내역 보기"** → `location.assign(BASE_URL + DETAIL_PATH + '#s=' + payload)`. 덮개가 뜨면 라우터와 모든 입력을 잠근다. "다시 하기"는 없다.
+- **정산:** HUD의 CASH OUT은 항상 보인다. 판이 진행 중이면 눌린 상태로 두었다가 정산 뒤에 연다. 순서: 현재 게임 `unmount` → **`flushOcean()`(§6.2. 큐에 남은 금액을 `Ev` 하나로 지급. bust 경로에서는 이미 지급했으므로 아무 일도 없다)** → `logger.end(reason)` → `encodeSummary` → 영수증 덮개(브랜드 머리말, `CASH OUT TICKET`, 최종 크레딧, 플레이 시간 mm:ss, 최고 당첨, 플레이한 게임과 판 수, 일괄 지급이 있었으면 "심해전설 BONUS +N" 한 줄) → 버튼 하나 **"상세 내역 보기"** → `location.assign(BASE_URL + DETAIL_PATH + '#s=' + payload)`. 덮개가 뜨면 라우터와 모든 입력을 잠근다. 두 번째 버튼 **"게임으로 돌아가기"**는 `location.assign(BASE_URL + location.search)`로 로비를 다시 열어 게이트와 새 세션을 시작한다(2026-11-25 사용자 결정).
 
 ### 6.4 fx API (`gambling/fx/types.ts`)
 ```ts

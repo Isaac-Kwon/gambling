@@ -1,4 +1,5 @@
 {
+  "app.back": "Torna al gioco",
   "app.chart.empty": "Non ci sono dati da mostrare.",
   "app.chart.touchHint": "Tocca il grafico per leggere i valori.",
   "app.degrade.body": "Questa sezione richiede la registrazione completa dei round. Al momento sono disponibili solo i valori di riepilogo.",

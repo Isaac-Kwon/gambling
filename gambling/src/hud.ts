@@ -31,6 +31,8 @@ export interface Hud {
   setRoute(r: Route): void;
   /** Disable every control (cash-out cover is up). */
   lock(): void;
+  /** Redraw the labels after a language change. */
+  relabel(): void;
   destroy(): void;
 }
 
@@ -166,6 +168,11 @@ export function mountHud(host: HTMLElement, o: HudOptions): Hud {
     setRoute(r) {
       el.dataset.route = r.kind === 'game' ? 'game' : 'lobby';
       back.tabIndex = r.kind === 'game' ? 0 : -1;
+    },
+    relabel() {
+      back.setAttribute('aria-label', t('hud.back'));
+      if (!cash.classList.contains('is-held')) setButtonLabel(cash, t('hud.cashout'));
+      showLevel();
     },
     lock() {
       locked = true;

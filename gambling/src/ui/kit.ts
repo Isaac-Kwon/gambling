@@ -57,7 +57,20 @@ export function setFxMode(mode: 'on' | 'off', root: HTMLElement = document.docum
 // ---------------------------------------------------------------- icons
 
 export type IconName =
-  | 'close' | 'plus' | 'minus' | 'back' | 'sound' | 'mute' | 'bolt' | 'loop' | 'coin' | 'star' | 'crown' | 'grid';
+  | 'close' | 'plus' | 'minus' | 'back' | 'sound' | 'mute' | 'bolt' | 'loop' | 'coin' | 'star' | 'crown' | 'grid' | 'gear';
+
+/** Cog outline: `teeth` square-ish teeth between radius `r0` and `r1`, centred on (12, 12). */
+function gearPath(teeth = 8, r0 = 7.6, r1 = 10.4): string {
+  const pts: string[] = [];
+  const step = (Math.PI * 2) / teeth;
+  const half = step * 0.22;
+  const p = (r: number, a: number) => `${(12 + r * Math.cos(a)).toFixed(2)} ${(12 + r * Math.sin(a)).toFixed(2)}`;
+  for (let i = 0; i < teeth; i++) {
+    const a = i * step - Math.PI / 2;
+    pts.push(p(r0, a - step / 2 + half * 0.6), p(r1, a - half), p(r1, a + half), p(r0, a + step / 2 - half * 0.6));
+  }
+  return `M${pts.join(' L')} Z`;
+}
 
 const STROKE: Partial<Record<IconName, string>> = {
   close: 'M6 6L18 18M18 6L6 18',
@@ -82,6 +95,9 @@ export function icon(name: IconName, size = 22): SVGSVGElement {
   if (name === 'sound' || name === 'mute') {
     kids.push(s('path', { d: 'M3.5 9H7.5L12.5 4.8V19.2L7.5 15H3.5Z', fill: 'currentColor', 'stroke-linejoin': 'round' }));
     kids.push(s('path', { d: name === 'sound' ? 'M15.5 9C17 10.6 17 13.4 15.5 15M18.2 6.4C21.2 9.6 21.2 14.4 18.2 17.6' : 'M15.5 9.2L21 14.8M21 9.2L15.5 14.8', ...line }));
+  }
+  if (name === 'gear') {
+    kids.push(s('path', { d: `${gearPath()} M12 8.4 A3.6 3.6 0 1 0 12 15.6 A3.6 3.6 0 1 0 12 8.4 Z`, fill: 'currentColor', 'fill-rule': 'evenodd' }));
   }
   if (name === 'coin') {
     kids.push(s('circle', { cx: 12, cy: 12, r: 9.5, fill: 'currentColor' }));

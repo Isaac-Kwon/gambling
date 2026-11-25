@@ -3,6 +3,7 @@ import { registerSW } from 'virtual:pwa-register';
 import { getLang, pickLang, setLang, LANG_STORAGE_KEY, type Lang } from '../../shared/i18n';
 import { t } from '../../shared/i18n.gambling';
 import { START_CREDITS } from '../../shared/config';
+import { blockPinchZoom } from '../../shared/nozoom';
 import { createRng, randomSeed, type Rng } from '../../shared/rng';
 import type { Session } from '../../shared/schema';
 import { createFx, createDomBackend, createNullFx } from '../fx/index';
@@ -61,6 +62,7 @@ export function boot(): App {
   const env = detectEnv();
   const lang = pickLang({ query: params.lang, stored: readStored(LANG_STORAGE_KEY), navigatorLang: navigator.language });
   setLang(lang);
+  if (typeof document !== 'undefined') document.documentElement.lang = lang;
   const clock = createClock();
   const registry = createRegistry();
   const hooks: AppHooks = {};
@@ -217,6 +219,7 @@ export function startPage(app: App): void {
       app.hooks.lobby = (root, r) => mountLobby(root, {
         rt: r, fx, clock: app.clock, fxOn: page.on,
         go: (id) => { void router.go({ kind: 'game', id }); },
+        onLang: () => hud.relabel(),
       });
       app.hooks.cashout = (_reason, r, session) => {
         try { fx.sfx.loop('ambient', false); } catch { /* ignore */ }
@@ -246,6 +249,7 @@ export function startPage(app: App): void {
 
 if (typeof document !== 'undefined' && document.getElementById('app') && document.getElementById('frame')) {
   registerSW({ immediate: false }); // a new worker applies on the next launch, never mid-session
+  blockPinchZoom();
   const app = boot();
   (globalThis as { __app?: App }).__app = app;
   startPage(app);

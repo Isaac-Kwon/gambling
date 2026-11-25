@@ -1,4 +1,5 @@
 {
+  "app.back": "Back to the game",
   "app.chart.empty": "There is no data to show.",
   "app.chart.touchHint": "Touch the chart to read its values.",
   "app.degrade.body": "This section needs the full round record. Right now only summary values are available.",

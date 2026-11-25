@@ -234,3 +234,6 @@
   0% { transform: scale(.97); opacity: .9; }
   100% { transform: scale(1.16); opacity: 0; }
 }
+
+/* purpose line under the button (notice.ts) */
+.gate .notice-purpose { flex: none; max-width: 340px; }

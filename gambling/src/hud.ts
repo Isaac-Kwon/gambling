@@ -9,13 +9,12 @@
  * balance element always carries the true wallet balance (tests read it while the digits still count).
  */
 import './hud.css';
-import type { Session } from '../../shared/schema';
 import { t } from '../../shared/i18n.gambling';
 import type { Fx } from '../fx/types';
 import type { Route } from './router';
 import type { SessionRuntime } from './session';
 import type { Clock } from './types';
-import { bellEmblem, button, fmtCredits, frameBox, goldText, h, icon, iconButton, logo, num, progressBar, setButtonLabel, setDigits } from './ui';
+import { bellEmblem, button, fmtCredits, goldText, h, icon, iconButton, num, progressBar, setButtonLabel, setDigits } from './ui';
 
 export interface HudOptions {
   rt: SessionRuntime;
@@ -180,28 +179,4 @@ export function mountHud(host: HTMLElement, o: HudOptions): Hud {
       el.remove();
     },
   };
-}
-
-/**
- * PHASE 4 HOOK — placeholder cash-out cover. `gambling/src/cashout.ts` (P4-A1) replaces this with the real
- * receipt (play time, best win, games and rounds, ocean BONUS line) and the detail button + summary handoff,
- * by setting `app.hooks.cashout` in main.ts. The router and all input are already locked when this shows.
- */
-export function showReceiptPlaceholder(host: HTMLElement, session: Session, balance: number): HTMLElement {
-  const final = num({ value: balance, tone: 'gold', size: 44, testid: 'receipt-credits' });
-  const ticket = h('div', 'rc__ticket', [
-    h('span', 'rc__label', [t('hud.receipt.final')]),
-    final.el,
-    h('span', 'rc__tear'),
-    h('span', 'rc__thanks', [t('hud.receipt.thanks')]),
-  ]);
-  const box = frameBox({ title: t('hud.receipt.title'), tone: 'red', className: 'rc__box', children: [logo({ size: 'sm' }), ticket] });
-  const el = h('div', 'rc', [h('div', 'rc__scrim'), box]);
-  el.dataset.testid = 'receipt';
-  el.dataset.reason = session.endReason ?? '';
-  el.setAttribute('role', 'dialog');
-  host.append(el);
-  void el.offsetWidth;
-  el.classList.add('is-open');
-  return el;
 }

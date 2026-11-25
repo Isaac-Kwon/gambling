@@ -1,0 +1,147 @@
+/* Cash-out ticket: a thermal-paper casino receipt printed out of a slot (cashout.ts); the paper is revealed top to bottom in steps. */
+.tk {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-top);
+  display: flex;
+  justify-content: center;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: calc(var(--safe-t) + 14px) 18px calc(var(--safe-b) + 18px);
+}
+.tk__scrim {
+  position: fixed;
+  inset: 0;
+  background: radial-gradient(120% 70% at 50% 0%, rgba(90, 30, 110, .55), rgba(5, 2, 10, .94) 70%);
+  animation: tk-fade 360ms ease-out both;
+}
+.tk__col {
+  position: relative;
+  width: min(100%, 330px);
+  margin: auto 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+/* ---- printer slot */
+.tk__printer { position: relative; padding-top: 16px; }
+.tk__slot {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  top: 0;
+  z-index: 2;
+  height: 20px;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #4a3d63 0%, #231a35 45%, #120b1f 100%);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .65), inset 0 1px 0 rgba(255, 255, 255, .22), 0 0 0 1px rgba(232, 184, 74, .45);
+}
+.tk__slot::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 4px;
+  height: 5px;
+  border-radius: 3px;
+  background: #05020a;
+  box-shadow: 0 0 8px rgba(41, 230, 255, .35);
+}
+.tk__feed {
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+  margin: 0 4px;
+  padding-bottom: 10px;
+  filter: drop-shadow(0 8px 12px rgba(0, 0, 0, .55));
+}
+
+/* ---- paper */
+.tk__paper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  color: #2c2013;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, Consolas, 'Courier New', var(--font-ko), monospace;
+  background:
+    repeating-linear-gradient(0deg, rgba(120, 90, 40, .045) 0 2px, transparent 2px 4px),
+    linear-gradient(180deg, #FFF9EA, #F3E6C6);
+  -webkit-mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 14px 100% repeat-x;
+  mask: conic-gradient(from -45deg at bottom, #0000, #000 1deg 89deg, #0000 90deg) bottom / 14px 100% repeat-x;
+  padding-bottom: 8px;
+}
+.tk__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 22px 12px 12px;
+  background: linear-gradient(180deg, #1c1030, #0f0820);
+  border-bottom: 3px double #E8B84A;
+}
+.tk__title {
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: .24em;
+  color: var(--cyan);
+  text-shadow: 0 0 8px rgba(41, 230, 255, .6);
+}
+.tk__body { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px 4px; }
+.tk__cap { font-size: 11px; font-weight: 700; letter-spacing: .18em; color: #7A5A20; }
+.tk__big {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 0 10px;
+  border-bottom: 2px dashed rgba(122, 90, 32, .45);
+}
+.tk__big .ui-num { filter: drop-shadow(0 2px 0 rgba(0, 0, 0, .4)); }
+.tk__line { display: flex; align-items: baseline; gap: 6px; font-size: 13px; font-weight: 700; letter-spacing: .04em; }
+.tk__k { flex: none; }
+.tk__dots { flex: 1; min-width: 8px; border-bottom: 2px dotted rgba(44, 32, 19, .35); transform: translateY(-3px); }
+.tk__v { flex: none; font-variant-numeric: tabular-nums; font-size: 15px; }
+.tk__line--bonus { color: #8a1030; }
+.tk__games { display: flex; flex-direction: column; gap: 5px; padding-top: 8px; border-top: 2px dashed rgba(122, 90, 32, .45); }
+.tk__line--game { font-size: 12px; }
+.tk__line--game .tk__v { font-size: 13px; }
+
+/* ---- foot: barcode, serial */
+.tk__foot { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 8px 16px 10px; }
+.tk__tear { align-self: stretch; border-top: 2px dashed rgba(122, 90, 32, .45); margin-bottom: 4px; }
+.tk__bars { display: flex; align-self: stretch; height: 40px; }
+.tk__bar { background: #2c2013; min-width: 0; }
+.tk__serial { font-size: 11px; letter-spacing: .22em; color: #5a4526; }
+.tk__thanks { font-family: var(--font-display); font-size: 12px; letter-spacing: .16em; color: #7A5A20; }
+
+/* ---- actions (revealed once the ticket is printed) */
+.tk__actions { opacity: 0; pointer-events: none; transform: translateY(8px); transition: opacity 360ms ease-out, transform 360ms ease-out; }
+.tk.is-done .tk__actions { opacity: 1; pointer-events: auto; transform: none; }
+
+/* ---- print animation (fx on): the paper feeds out of the slot in steps, like a thermal printer */
+.tk:not(.is-static) .tk__paper { clip-path: inset(0 0 100% 0); }
+.tk.is-printing .tk__paper { animation: tk-print 2000ms steps(40, end) 250ms both; }
+@keyframes tk-print { from { clip-path: inset(0 0 100% 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes tk-fade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .tk:not(.is-static) .tk__paper { clip-path: none; }
+  .tk.is-printing .tk__paper { animation: none; }
+}
+
+/* ---- small screens */
+@media (max-height: 680px) {
+  .tk { padding-top: calc(var(--safe-t) + 8px); padding-bottom: calc(var(--safe-b) + 10px); }
+  .tk__col { gap: 10px; }
+  .tk__head { padding: 16px 10px 8px; gap: 3px; }
+  .tk__body { gap: 7px; padding-top: 8px; }
+  .tk__big .ui-num { font-size: 32px !important; }
+  .tk__bars { height: 28px; }
+  .tk__foot { gap: 4px; padding-bottom: 6px; }
+}
+
+/* fx=off: static, nothing moves */
+:root[data-fx="off"] .tk__scrim { animation: none; }
+:root[data-fx="off"] .tk__actions { transition: none; }

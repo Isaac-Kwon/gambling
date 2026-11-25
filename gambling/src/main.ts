@@ -11,7 +11,8 @@ import type { Fx } from '../fx/types';
 import { createClock } from './clock';
 import { detectEnv, type Env } from './env';
 import { mountGate } from './gate';
-import { mountHud, showReceiptPlaceholder } from './hud';
+import { mountReceipt } from './cashout';
+import { mountHud } from './hud';
 import { mountLobby } from './lobby';
 import { parseParams, type AppParams } from './params';
 import { createRegistry, type Registry } from './registry';
@@ -27,7 +28,7 @@ export interface AppHooks {
   route?(r: Route): void;
   /**
    * Cash-out / bust. When this runs the router is locked, the game is unmounted and the session is finished
-   * (ocean queue flushed, `endedAt` saved). PHASE 4: `cashout.ts` sets this to show the receipt + handoff.
+   * (ocean queue flushed, `endedAt` saved). `cashout.ts` shows the receipt + handoff (wired in startPage).
    */
   cashout?(reason: 'bust' | 'cashout', rt: SessionRuntime, session: Session): void;
 }
@@ -218,8 +219,7 @@ export function startPage(app: App): void {
       app.hooks.cashout = (_reason, r, session) => {
         try { fx.sfx.loop('ambient', false); } catch { /* ignore */ }
         hud.lock();
-        // PHASE 4: cashout.ts replaces this hook (receipt details, summary handoff, detail button).
-        showReceiptPlaceholder(frame, session, r.wallet.balance);
+        mountReceipt(frame, { session, balance: r.wallet.balance, fx, fxOn: page.on, save: () => r.logger.save() });
       };
 
       void router.start().then(() => rt.save());

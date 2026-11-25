@@ -4,8 +4,5 @@
   "hud.bonus": "심해전설 BONUS +{amt}",
   "hud.cashout": "CASH OUT",
   "hud.level": "LV {n}",
-  "hud.levelup": "LEVEL UP!",
-  "hud.receipt.final": "FINAL CREDITS",
-  "hud.receipt.thanks": "THANK YOU FOR PLAYING",
-  "hud.receipt.title": "CASH OUT TICKET"
+  "hud.levelup": "LEVEL UP!"
 }

@@ -1,19 +1,34 @@
+/** ABYSS LEGEND game module (lazy chunk): view (DOM) + core (round logic). */
 import type { GameCtx, GameModule } from "../../src/types";
+import { createOceanCore, type OceanCore } from "./core";
+import { createOceanView, type OceanView } from "./view";
 
-/** Empty shell. The real game (core.ts + view.ts) replaces the body; the factory shape stays. */
 export function createGame(): GameModule {
-  let root: HTMLElement | null = null;
+  let view: OceanView | null = null;
+  let core: OceanCore | null = null;
+  let host: HTMLElement | null = null;
   return {
     id: "ocean",
-    mount(el: HTMLElement, _ctx: GameCtx) {
-      root = el;
-      el.dataset.game = "ocean";
+    mount(root: HTMLElement, ctx: GameCtx) {
+      if (view) this.unmount();
+      host = root;
+      root.dataset.game = "ocean";
+      view = createOceanView(root, ctx);
+      core = createOceanCore(ctx, view);
+      view.bind(core);
     },
     unmount() {
-      if (root) delete root.dataset.game;
-      root = null;
+      core?.dispose();
+      view?.destroy();
+      core = null;
+      view = null;
+      if (host) delete host.dataset.game;
+      host = null;
     },
-    canLeave: () => true,
+    /** Leaving waits until the reels are at rest (the queue itself lives in the session store). */
+    canLeave: () => (core ? core.canLeave() : true),
+    onSuspend() { core?.suspend(); },
+    onResume() { /* nothing resumes by itself */ },
   };
 }
 

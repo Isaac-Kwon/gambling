@@ -437,7 +437,7 @@
   box-shadow: 0 0 0 2px var(--ink-sea), inset 0 1px 0 #fff;
 }
 .ocean-coin__slot i { width: 4px; height: 24px; border-radius: 2px; background: #010A14; box-shadow: 0 0 0 1px rgba(255, 107, 94, .9), 0 0 8px rgba(255, 107, 94, .9); }
-.ocean-coin__label { width: 5.5em; font: 7px/1.6 var(--led-font); color: #FF8E80; text-shadow: 0 0 6px rgba(255, 107, 94, .8); }
+.ocean-coin__label { width: 6em; overflow-wrap: normal; word-break: keep-all; font: 7px/1.6 var(--led-font); color: #FF8E80; text-shadow: 0 0 6px rgba(255, 107, 94, .8); }
 
 .ocean-turbo {
   appearance: none;

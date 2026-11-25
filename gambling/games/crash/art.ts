@@ -1,8 +1,14 @@
 /**
  * SKYROCKET art, drawn in code: the night sky (stars, moon glow, city skyline), the rocket and the crash puff.
- * All are SVG strings used with innerHTML on elements the view owns. Positions come from a tiny seeded
+ * The sky (stars, skyline) is made of standalone SVG documents shown as background images; the rocket and
+ * the puff are SVG strings used with innerHTML on elements the view owns. Positions come from a tiny seeded
  * generator, so the sky is the same on every visit and never calls Math.random.
  */
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+/** CSS `url()` of a standalone SVG document. */
+export const svgUrl = (svg: string): string => `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
 
 function lcg(seed: number): () => number {
   let x = seed >>> 0;
@@ -12,25 +18,38 @@ function lcg(seed: number): () => number {
   };
 }
 
-/** Stars: three depths. `sky-star--t` ones twinkle (opacity, >= 1 s ease-in-out). viewBox 0 0 400 600. */
-export function starsSvg(): string {
+/** Twinkle groups: each is its own image layer whose opacity loops on the compositor (see `.cr-stars__l--t`). */
+export const TWINKLE_GROUPS = 3;
+
+/**
+ * Stars: three depths, viewBox 0 0 400 600. Standalone SVG documents used as background images (an inline
+ * SVG in the stage was laid out again on every flight frame, and per-star opacity loops on SVG circles
+ * re-styled and repainted the whole sky each frame). `base` holds the still stars; `tw[g]` the stars of
+ * twinkle group g, whose layer fades .25 ↔ 1 (>= 1 s, ease-in-out). Positions come from the same seeded
+ * generator as before, so the sky is unchanged.
+ */
+export function starsSvgs(): { base: string; tw: string[] } {
   const r = lcg(20261125);
-  const out: string[] = [];
+  const base: string[] = [];
+  const tw: string[][] = Array.from({ length: TWINKLE_GROUPS }, () => []);
   for (let i = 0; i < 70; i++) {
     const x = (r() * 400).toFixed(1), y = (r() * 470).toFixed(1);
     const big = r() < 0.18;
     const rad = big ? 1.5 + r() * 0.9 : 0.6 + r() * 0.7;
-    const tw = r() < 0.4;
+    const isTw = r() < 0.4;
     const col = r() < 0.3 ? "#9FF3FF" : r() < 0.5 ? "#FFB3E1" : "#FFFFFF";
-    const dly = (r() * 4).toFixed(2);
-    const op = (0.35 + r() * 0.55).toFixed(2);
-    out.push(`<circle class="${tw ? "sky-star sky-star--t" : "sky-star"}" cx="${x}" cy="${y}" r="${rad.toFixed(2)}" fill="${col}" fill-opacity="${op}"${tw ? ` style="animation-delay:-${dly}s"` : ""}/>`);
-    if (big) out.push(`<path d="M${x} ${(+y - rad * 3.2).toFixed(1)}L${(+x + rad * 0.55).toFixed(1)} ${y}L${x} ${(+y + rad * 3.2).toFixed(1)}L${(+x - rad * 0.55).toFixed(1)} ${y}Z" fill="#fff" fill-opacity=".55"/>`);
+    const dly = r() * 4;
+    r();   // former per-star opacity draw: the stylesheet always overrode it with .8, kept so later draws stay put
+    const into = isTw ? tw[Math.floor((dly / 4) * TWINKLE_GROUPS) % TWINKLE_GROUPS] : base;
+    into.push(`<circle cx="${x}" cy="${y}" r="${rad.toFixed(2)}" fill="${col}" fill-opacity=".8"/>`);
+    if (big) base.push(`<path d="M${x} ${(+y - rad * 3.2).toFixed(1)}L${(+x + rad * 0.55).toFixed(1)} ${y}L${x} ${(+y + rad * 3.2).toFixed(1)}L${(+x - rad * 0.55).toFixed(1)} ${y}Z" fill="#fff" fill-opacity=".55"/>`);
   }
-  return `<svg viewBox="0 0 400 600" preserveAspectRatio="xMidYMin slice" aria-hidden="true" focusable="false">${out.join("")}</svg>`;
+  const doc = (body: string[]) =>
+    `<svg xmlns="${SVG_NS}" width="400" height="600" viewBox="0 0 400 600" preserveAspectRatio="xMidYMin slice">${body.join("")}</svg>`;
+  return { base: doc(base), tw: tw.map(doc) };
 }
 
-/** City skyline silhouette with lit windows and neon roof signs. viewBox 0 0 400 120, sits at the bottom edge. */
+/** City skyline silhouette with lit windows and neon roof signs. viewBox 0 0 400 120, sits at the bottom edge. Standalone document (background image). */
 export function skylineSvg(): string {
   const r = lcg(777);
   const bld: string[] = [];
@@ -50,7 +69,7 @@ export function skylineSvg(): string {
     }
     x += w + 2 + Math.floor(r() * 5);
   }
-  return `<svg viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">` +
+  return `<svg xmlns="${SVG_NS}" width="400" height="120" viewBox="0 0 400 120" preserveAspectRatio="xMidYMax slice">` +
     `<defs><linearGradient id="skl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2A1450"/><stop offset="1" stop-color="#0B0612"/></linearGradient></defs>` +
     `<g fill="url(#skl)">${bld.join("")}</g><g>${win.join("")}</g></svg>`;
 }

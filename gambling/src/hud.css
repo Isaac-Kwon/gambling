@@ -89,6 +89,18 @@
 .hud__cash.ui-btn--sm { min-width: 96px; padding-left: 12px; padding-right: 12px; }
 .hud__cash.is-held { transform: translateY(3px); filter: saturate(.8) brightness(.9); }
 
+/* Narrow phones (320–389px): in a game the row also holds the ? button, which left the balance 36px for its
+   digits at 320 ("10,0" clipped) and 76px at 360 (six digits clipped). Tighter gaps, a smaller cash-out label
+   and digits, and no coin badge in games leave room for "1,234,567". Every control stays >= 44px. */
+@media (max-width: 389.98px) {
+  .hud { padding-left: 8px; padding-right: 8px; }
+  .hud__row { gap: 5px; }
+  .hud__bal { gap: 4px; padding: 0 8px 0 6px; }
+  .hud__bal .ui-num { font-size: 18px !important; }   /* num() sets 22px inline */
+  .hud[data-route="game"] .hud__coin { display: none; }
+  .hud__cash.ui-btn--sm { min-width: 0; padding-left: 10px; padding-right: 10px; font-size: 15px; }
+}
+
 .hud__xp { display: flex; align-items: center; gap: 8px; height: 20px; margin-top: 5px; padding: 0 2px; }
 .hud__lv {
   flex: none;

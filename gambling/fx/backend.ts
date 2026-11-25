@@ -183,7 +183,8 @@ export function createDomBackend(o: DomBackendOptions): FxBackend {
     raf = 0;
     const dt = lastTs ? Math.max(0, ts - lastTs) : 1000 / 60;
     lastTs = ts;
-    for (const fl of [...followers]) if (!fl(dt, ts)) followers.delete(fl);
+    // Deleting the current entry while iterating a Set is safe; no per-frame copy.
+    for (const fl of followers) if (!fl(dt, ts)) followers.delete(fl);
     const g = gfx();
     if (g) g.frame(dt);
     if (!suspended && (followers.size > 0 || (g && g.busy))) raf = requestAnimationFrame(tick);

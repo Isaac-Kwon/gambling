@@ -14,7 +14,7 @@ import {
   type Overlay, type Toggle,
 } from "../../src/ui/index";
 import type { GameCtx } from "../../src/types";
-import { puffSvg, rocketSvg, skylineSvg, starsSvg } from "./art";
+import { puffSvg, rocketSvg, skylineSvg, starsSvgs, svgUrl, TWINKLE_GROUPS } from "./art";
 import {
   affordableBet, BET_MAX, BET_MIN, BET_STEP, targetStep,
   type CashInfo, type CrashCore, type CrashState, type CrashUi, type CrowdPlayer, type FlightPlan,
@@ -70,10 +70,20 @@ export function createCrashView(root: HTMLElement, ctx: GameCtx): CrashView {
   hist.dataset.testid = "history";
 
   // ---------------------------------------------------------------- stage (sky + graph)
-  const stars = h("div", "cr-stars");
-  stars.innerHTML = starsSvg();
+  // Sky layers are background images (not inline SVG): nothing in them is laid out or re-styled per frame.
+  const sky = starsSvgs();
+  const layer = (svg: string, cls = ""): HTMLElement => {
+    const d = h("div", `cr-stars__l${cls}`);
+    d.style.backgroundImage = svgUrl(svg);
+    return d;
+  };
+  const stars = h("div", "cr-stars", [layer(sky.base), ...sky.tw.map((svg, g) => {
+    const d = layer(svg, " cr-stars__l--t");
+    d.style.animationDelay = `-${(((g + 0.5) * 4) / TWINKLE_GROUPS).toFixed(2)}s`;
+    return d;
+  })]);
   const city = h("div", "cr-city");
-  city.innerHTML = skylineSvg();
+  city.style.backgroundImage = svgUrl(skylineSvg());
   const moon = h("div", "cr-moon");
 
   const gridG = el("g", { class: "cr-grid" });
@@ -249,6 +259,7 @@ export function createCrashView(root: HTMLElement, ctx: GameCtx): CrashView {
   let t0 = 0;
   let mode: "idle" | "countdown" | "flight" | "crashed" = "idle";
   let shownEl = 0;   // ms into the climb that is drawn
+  let headX = 0, headY = 0;   // head of the drawn curve (the puff is placed there only when it shows: left/top cost a layout)
   let stopFrame: (() => void) | null = null;
   let cd: { from: number; to: number } | null = null;
   let lastMultText = "";
@@ -304,8 +315,7 @@ export function createCrashView(root: HTMLElement, ctx: GameCtx): CrashView {
     const cx = last[0] - ux * 16, cy = last[1] - uy * 16;   // rocket centre (nose at the head)
     rocket.style.transform = `translate3d(${(cx - 32).toFixed(1)}px,${(cy - 16).toFixed(1)}px,0) rotate(${ang.toFixed(3)}rad)`;
     tail.style.transform = `translate3d(${(cx - ux * 24 - 9).toFixed(1)}px,${(cy - uy * 24 - 9).toFixed(1)}px,0)`;
-    puff.style.left = `${(last[0] - 40).toFixed(1)}px`;
-    puff.style.top = `${(last[1] - 40).toFixed(1)}px`;
+    headX = last[0]; headY = last[1];
 
     // grid (labels are read-outs of the current scale)
     const my = niceTicks(1, mSpan, M_STEPS);
@@ -536,6 +546,8 @@ export function createCrashView(root: HTMLElement, ctx: GameCtx): CrashView {
       chart.classList.add("is-crashed");
       rocket.classList.add("is-gone");
       puff.classList.remove("is-on");
+      puff.style.left = `${(headX - 40).toFixed(1)}px`;
+      puff.style.top = `${(headY - 40).toFixed(1)}px`;
       void puff.offsetWidth;
       puff.classList.add("is-on");
       showStatus(t("crash.crashed"), "bad");

@@ -13,6 +13,8 @@ import { jitter } from "../shake";
 
 const RAY_TINTS = [0xf5c542, 0xffe9a6] as const;
 const FADE_MS = 250;
+/** Additive particles (sparks, exhaust) prepared at warm-up; their live count stays well below this. */
+const ADD_WARM = 200;
 /** Max alpha change per ms of the focus glow (full swing >= 220 ms: never a flash, §6.6). */
 const GLOW_RATE = 1 / 220;
 
@@ -427,6 +429,20 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
         const pn = new Particle({ texture: T.coin[0], x: -64, y: -64, alpha: 0 });
         const pa = new Particle({ texture: T.spark, x: -64, y: -64, alpha: 0 });
         pcNormal.particleChildren = [pn]; pcAdd.particleChildren = [pa];
+        pcNormal.update(); pcAdd.update();
+        safeRender();
+        pcNormal.particleChildren = normOn; pcAdd.particleChildren = addOn;
+        pcNormal.update(); pcAdd.update();
+      },
+      () => {
+        // Full particle pools, and the containers' GPU buffers sized for them (invisible, off canvas): the
+        // first EPIC celebration (350 particles in one frame) otherwise creates every Particle and grows
+        // both buffers inside its first frame.
+        while (normPool.length < MAX_PARTICLES) normPool.push(new Particle({ texture: T.coin[0], anchorX: 0.5, anchorY: 0.5 }));
+        while (addPool.length < ADD_WARM) addPool.push(new Particle({ texture: T.spark, anchorX: 0.5, anchorY: 0.5 }));
+        for (const p of normPool) { p.x = -64; p.y = -64; p.alpha = 0; }
+        for (const p of addPool) { p.x = -64; p.y = -64; p.alpha = 0; }
+        pcNormal.particleChildren = normPool; pcAdd.particleChildren = addPool;
         pcNormal.update(); pcAdd.update();
         safeRender();
         pcNormal.particleChildren = normOn; pcAdd.particleChildren = addOn;

@@ -116,17 +116,19 @@ export function createReels(clock: Clock, initial: Sym[][]): Reels {
     if (!force && r.u === r.drawnU) return;
     r.drawnU = r.u;
     r.strip.style.transform = `translate3d(0,${(-r.u * ch).toFixed(2)}px,0)`;
-    const lo = Math.floor(r.u) - 1;
-    // keep cells whose index is in [lo, lo + CELLS), reuse the others for the missing indices
-    const want = new Set<number>();
-    for (let i = lo; i < lo + CELLS; i++) want.add(i);
-    const free: Cell[] = [];
-    for (const c of r.cells) {
-      if (want.has(c.idx)) want.delete(c.idx);
-      else free.push(c);
-    }
-    for (const i of want) {
-      const c = free.pop()!;
+    const lo = Math.floor(r.u) - 1, hi = lo + CELLS;
+    // Keep cells whose index is in [lo, hi), reuse the others for the missing indices. Runs every frame
+    // of a spin for every reel: plain loops over the 7 cells, no allocation.
+    const cells = r.cells;
+    for (let i = lo; i < hi; i++) {
+      let shown = false;
+      for (let k = 0; k < CELLS; k++) if (cells[k].idx === i) { shown = true; break; }
+      if (shown) continue;
+      let c = cells[CELLS - 1];
+      for (let k = CELLS - 1; k >= 0; k--) {
+        const x = cells[k].idx;
+        if (!(x >= lo && x < hi)) { c = cells[k]; break; }   // NaN (re-indexed at rest) is free too
+      }
       c.idx = i;
       c.el.style.transform = `translate3d(0,${(i * ch).toFixed(2)}px,0)`;
       c.el.dataset.i = String(i);

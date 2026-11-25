@@ -62,6 +62,7 @@ export function createTicketPrinter(o: { title: string }): TicketPrinter {
   el.setAttribute("aria-hidden", "true");
   let roll: HTMLElement | null = null;
   let count = 0;
+  let hgt = 0;
   const live = new Set<Animation>();
 
   const newRoll = (): HTMLElement => {
@@ -81,7 +82,8 @@ export function createTicketPrinter(o: { title: string }): TicketPrinter {
       // the strip sways a little more as it gets longer
       roll.style.setProperty("--sway", `${Math.min(3, 0.6 + count * 0.25)}deg`);
       if (!(ms > 0) || typeof roll.animate !== "function") return;
-      const hgt = t.offsetHeight || 56;
+      // Every ticket has the same height: measure once per strip (a read here forces a synchronous layout).
+      if (!(hgt > 0)) hgt = t.offsetHeight || 56;
       const a = roll.animate(
         [{ transform: `translate3d(0, ${-hgt}px, 0)` }, { transform: "translate3d(0, 0, 0)" }],
         { duration: ms, easing: "cubic-bezier(.3,.1,.5,1)" },
@@ -93,6 +95,7 @@ export function createTicketPrinter(o: { title: string }): TicketPrinter {
       const r = roll;
       roll = null;
       count = 0;
+      hgt = 0;   // the next strip measures again (the layout may have changed meanwhile)
       if (!r) return;
       for (const a of live) { try { a.finish(); } catch { /* ignore */ } }
       live.clear();

@@ -19,5 +19,5 @@
       "@i18n/*": ["./i18n/*"]
     }
   },
-  "include": ["gambling", "understanding", "shared", "scripts", "i18n/**/*.json", "vite.config.ts", "vitest.config.ts"]
+  "include": ["e2e", "playwright.config.ts", "gambling", "understanding", "shared", "scripts", "i18n/**/*.json", "vite.config.ts", "vitest.config.ts"]
 }

@@ -69,6 +69,7 @@ function render(el: HTMLElement, ctx: SectionCtx): void {
   ok.type = 'submit';
   const skip = h('button', 'btn secondary', t('intro.btn.skip'));
   skip.type = 'button';
+  skip.dataset.testid = 'btn-skip';
   actions.append(ok, skip);
   form.append(qm, fs, err, actions);
 

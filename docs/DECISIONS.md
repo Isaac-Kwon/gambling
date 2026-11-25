@@ -68,3 +68,6 @@
 - 2026-11-25 [pwa] `beforeinstallprompt`는 `install.ts` 모듈 로드 시점에 잡아 두고 게이트 뒤 로비 독에 "앱 설치" 버튼으로 표시; iOS Safari에서만 "홈 화면에 추가" 안내를 기기당 1회(`og.ihint`) — 게이트 때문에 로비 장착 전에 이벤트가 옴, 재방문 유도 금지
 - 2026-11-25 [pwa] Workbox의 bit.ly 안내 링크는 빌드 뒤 `stripWorkboxLinks`로 제거(번들 검사 허용 목록은 그대로) — §1.3 외부 URL 규칙 유지
 - 2026-11-25 [user] 라이선스는 전체(코드·글·그림·소리) CC BY-NC-SA 4.0, 폰트는 각자의 OFL 1.1 — 가짜 카지노의 상업적 재사용 방지
+- 2026-11-25 [e2e] Playwright: iPhone 13(WebKit)·Pixel 7(Chromium), `BASE_PATH=/gambling/` 빌드를 `dist-e2e`(EPERM 시 임시 폴더)에서 `vite preview`; 기대값은 `shared/rules`로 재계산, 모든 테스트에서 외부 요청·페이지 오류·console.error를 실패로 — §11.4 12개 시나리오
+- 2026-11-25 [e2e] 스크린샷은 기준 이미지가 아닌 첨부물(레이아웃은 단언으로 검사), 서비스 워커는 시나리오 8에서만 허용, 시나리오 8은 WebKit에서 건너뜀(setOffline이 SW 탐색에 적용되지 않음) — 엔진별 글꼴·글로우 차이, 결정성
+- 2026-11-25 [e2e] CI의 e2e 잡은 배포와 분리된 비차단 잡 — 리눅스 러너에서 안정성이 확인되면 배포 조건으로 올린다

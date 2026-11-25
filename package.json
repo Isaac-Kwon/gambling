@@ -2,6 +2,7 @@
   "name": "gambling",
   "version": "0.0.0",
   "private": true,
+  "license": "CC-BY-NC-SA-4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,6 +17,7 @@
     "e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@resvg/resvg-js": "^2.6.2",
     "@types/node": "^26.6.7",
     "pixi.js": "^8.23.0",

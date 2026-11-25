@@ -1,0 +1,23 @@
+{
+  "crash.auto": "AUTO OUT",
+  "crash.bet": "BET",
+  "crash.bust": "BUST",
+  "crash.cancel": "CANCEL",
+  "crash.cashed": "CASHED OUT",
+  "crash.cashout": "CASH OUT",
+  "crash.crashed": "CRASHED",
+  "crash.hist": "LAST",
+  "crash.live": "LIVE",
+  "crash.max": "MAX",
+  "crash.next": "NEXT LAUNCH",
+  "crash.players": "PLAYERS",
+  "crash.players.sum": "{n}명 · 총 베팅 {total}",
+  "crash.ready": "READY",
+  "crash.short.body": "SKYROCKET 최소 베팅은 {min} 크레딧입니다.",
+  "crash.short.cashout": "CASH OUT",
+  "crash.short.lobby": "로비",
+  "crash.short.title": "크레딧 부족",
+  "crash.target": "AUTO CASH OUT",
+  "crash.title": "SKYROCKET",
+  "crash.you": "YOU"
+}

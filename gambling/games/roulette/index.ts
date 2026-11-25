@@ -1,19 +1,34 @@
+/** RUBY ROULETTE game module (lazy chunk): view (DOM) + core (round logic). */
 import type { GameCtx, GameModule } from "../../src/types";
+import { createRouletteCore, type RouletteCore } from "./core";
+import { createRouletteView, type RouletteView } from "./view";
 
-/** Empty shell. The real game (core.ts + view.ts) replaces the body; the factory shape stays. */
 export function createGame(): GameModule {
-  let root: HTMLElement | null = null;
+  let view: RouletteView | null = null;
+  let core: RouletteCore | null = null;
+  let host: HTMLElement | null = null;
   return {
     id: "roulette",
-    mount(el: HTMLElement, _ctx: GameCtx) {
-      root = el;
-      el.dataset.game = "roulette";
+    mount(root: HTMLElement, ctx: GameCtx) {
+      if (view) this.unmount();
+      host = root;
+      root.dataset.game = "roulette";
+      view = createRouletteView(root, ctx);
+      core = createRouletteCore(ctx, view);
+      view.bind(core);
     },
     unmount() {
-      if (root) delete root.dataset.game;
-      root = null;
+      core?.dispose();
+      view?.destroy();
+      core = null;
+      view = null;
+      if (host) delete host.dataset.game;
+      host = null;
     },
-    canLeave: () => true,
+    /** Leaving waits until the ball is at rest and the round is settled. */
+    canLeave: () => (core ? core.canLeave() : true),
+    onSuspend() { core?.suspend(); },
+    onResume() { /* nothing to resume */ },
   };
 }
 

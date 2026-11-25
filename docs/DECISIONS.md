@@ -67,3 +67,4 @@
 - 2026-11-25 [pwa] 매니페스트 name "OROBELLE 오로벨 카지노"(§2.1 표), 아이콘은 `@resvg/resvg-js`로 `icon.svg`에서 생성해 PNG 커밋(CI는 gen:icons 생략), maskable은 #0B0612 바탕에 10% 여백 — 시스템 의존성 없음, 안전 영역
 - 2026-11-25 [pwa] `beforeinstallprompt`는 `install.ts` 모듈 로드 시점에 잡아 두고 게이트 뒤 로비 독에 "앱 설치" 버튼으로 표시; iOS Safari에서만 "홈 화면에 추가" 안내를 기기당 1회(`og.ihint`) — 게이트 때문에 로비 장착 전에 이벤트가 옴, 재방문 유도 금지
 - 2026-11-25 [pwa] Workbox의 bit.ly 안내 링크는 빌드 뒤 `stripWorkboxLinks`로 제거(번들 검사 허용 목록은 그대로) — §1.3 외부 URL 규칙 유지
+- 2026-11-25 [user] 라이선스는 전체(코드·글·그림·소리) CC BY-NC-SA 4.0, 폰트는 각자의 OFL 1.1 — 가짜 카지노의 상업적 재사용 방지

@@ -20,7 +20,7 @@
   "blackjack.say.deal": "GOOD LUCK",
   "blackjack.say.player": "YOUR MOVE",
   "blackjack.shoe": "SHOE",
-  "blackjack.short.body": "The minimum bet at BLACKJACK 21 is {min} credits.",
+  "blackjack.short.body": "The BLACKJACK 21 minimum bet is {min} credits.",
   "blackjack.short.cashout": "CASH OUT",
   "blackjack.short.lobby": "Lobby",
   "blackjack.short.title": "Not enough credits",

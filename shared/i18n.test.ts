@@ -36,7 +36,9 @@ describe('i18n files', () => {
 
 describe('t()', () => {
   it('falls back to ko for empty values, then to the key', () => {
-    expect(tg('app.title', undefined, 'en')).toBe(g.ko['app.title']);
+    const t = makeT({ ko: { 'a.b': '한국어' }, en: { 'a.b': '' }, it: {} });
+    expect(t('a.b', undefined, 'en')).toBe('한국어');
+    expect(t('a.b', undefined, 'it')).toBe('한국어');
     expect(tg('nope.key')).toBe('nope.key');
   });
   it('substitutes {name} params', () => {

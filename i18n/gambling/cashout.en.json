@@ -1,11 +1,11 @@
 {
-  "cashout.bonus": "",
-  "cashout.detail": "",
-  "cashout.final": "",
-  "cashout.games": "",
-  "cashout.maxwin": "",
-  "cashout.rounds": "",
-  "cashout.thanks": "",
-  "cashout.time": "",
-  "cashout.title": ""
+  "cashout.bonus": "ABYSS LEGEND BONUS PAYOUT",
+  "cashout.detail": "View details",
+  "cashout.final": "FINAL CREDITS",
+  "cashout.games": "GAMES PLAYED",
+  "cashout.maxwin": "BIGGEST WIN",
+  "cashout.rounds": "{n} rounds",
+  "cashout.thanks": "THANK YOU FOR PLAYING",
+  "cashout.time": "PLAY TIME",
+  "cashout.title": "CASH OUT TICKET"
 }

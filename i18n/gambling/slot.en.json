@@ -1,15 +1,15 @@
 {
-  "slot.auto": "",
-  "slot.bet": "",
-  "slot.lines": "",
-  "slot.short.body": "",
-  "slot.short.cashout": "",
-  "slot.short.lobby": "",
-  "slot.short.title": "",
-  "slot.spin": "",
-  "slot.stop": "",
-  "slot.sub": "",
-  "slot.title": "",
-  "slot.turbo": "",
-  "slot.win": ""
+  "slot.auto": "AUTO",
+  "slot.bet": "BET",
+  "slot.lines": "20 LINES",
+  "slot.short.body": "ORO SEVENS minimum bet is {min} credits.",
+  "slot.short.cashout": "CASH OUT",
+  "slot.short.lobby": "Lobby",
+  "slot.short.title": "Not enough credits",
+  "slot.spin": "SPIN",
+  "slot.stop": "STOP",
+  "slot.sub": "LUCKY 7 · WILD STAR",
+  "slot.title": "ORO SEVENS",
+  "slot.turbo": "TURBO",
+  "slot.win": "WIN"
 }

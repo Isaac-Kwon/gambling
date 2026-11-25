@@ -1,8 +1,8 @@
 {
-  "hud.back": "",
-  "hud.balance": "",
-  "hud.bonus": "",
-  "hud.cashout": "",
-  "hud.level": "",
-  "hud.levelup": ""
+  "hud.back": "Back to lobby",
+  "hud.balance": "CREDITS",
+  "hud.bonus": "ABYSS LEGEND BONUS +{amt}",
+  "hud.cashout": "CASH OUT",
+  "hud.level": "LV {n}",
+  "hud.levelup": "LEVEL UP!"
 }

@@ -1,6 +1,6 @@
 {
-  "install.button": "",
-  "install.close": "",
-  "install.ios.body": "",
-  "install.ios.title": ""
+  "install.button": "Install app",
+  "install.close": "Close",
+  "install.ios.body": "Tap the share button below, then choose “Add to Home Screen”.",
+  "install.ios.title": "Add to Home Screen"
 }

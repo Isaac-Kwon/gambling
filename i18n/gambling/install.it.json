@@ -1,6 +1,6 @@
 {
-  "install.button": "",
-  "install.close": "",
-  "install.ios.body": "",
-  "install.ios.title": ""
+  "install.button": "Installa l'app",
+  "install.close": "Chiudi",
+  "install.ios.body": "Tocca il pulsante di condivisione qui sotto, poi scegli “Aggiungi a schermata Home”.",
+  "install.ios.title": "Aggiungi a schermata Home"
 }

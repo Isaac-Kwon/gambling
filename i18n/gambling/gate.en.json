@@ -1,7 +1,7 @@
 {
-  "gate.bonus": "",
-  "gate.credits": "",
-  "gate.enter": "",
-  "gate.enter.sub": "",
-  "gate.welcome": ""
+  "gate.bonus": "WELCOME BONUS",
+  "gate.credits": "CREDITS",
+  "gate.enter": "TAP TO ENTER",
+  "gate.enter.sub": "TAP TO START",
+  "gate.welcome": "WELCOME BACK"
 }

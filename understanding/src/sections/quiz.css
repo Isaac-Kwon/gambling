@@ -1,0 +1,11 @@
+.quiz-item { margin: 0 0 16px; padding: 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; max-width: var(--measure); }
+.quiz-label { margin: 0 0 4px; font-size: 0.8125rem; color: var(--muted); }
+.quiz-q { margin: 0 0 12px; font-weight: 600; }
+.quiz-choices { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 8px; }
+.quiz-choices .btn { min-width: 96px; justify-content: center; background: transparent; color: var(--accent-ink); }
+.quiz-choices .btn[aria-pressed="true"] { background: var(--accent); color: #fff; }
+@media (prefers-color-scheme: dark) { .quiz-choices .btn[aria-pressed="true"] { color: #0f1316; } }
+.quiz-result { margin: 12px 0 0; }
+.quiz-result p { margin: 0 0 0.6em; }
+.quiz-verdict { font-weight: 600; }
+.quiz-score { font-weight: 600; }

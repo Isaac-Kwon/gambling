@@ -54,3 +54,13 @@
 - 2026-11-25 [blackjack] 슈는 store의 `{no,pos,rc}`로 저장해 이어하기에도 유지, 코어는 `Round.res`를 읽지 않음(카드 순서는 시드·슈 번호로만 결정), 홀카드 값은 뒤집기 전에는 DOM에 없음, 푸시도 tier 0 축하
 - 2026-11-25 [cashout] 정산 화면은 크림색 감열지 티켓(OROBELLE 헤더, 금색 최종 크레딧), 위에서 아래로 인쇄 연출, 인쇄가 끝나야 "상세 내역 보기" 활성; 저장 실패와 무관하게 요약 해시를 붙여 같은 창에서 이동
 - 2026-11-25 [cashout] 최고 당첨과 게임 목록은 일괄 지급 Ev를 제외(판이 아님), 일괄 지급액은 별도 "BONUS PAYOUT" 줄 — Phase 5에서 `summarize().maxWin`도 같은 기준으로 맞출 것
+- 2026-11-25 [user] understanding의 크레딧 환산은 1크레딧 = 10원(시작 10,000크레딧 = 10만 원); 최저시급은 2026년 10,320원(고용노동부 고시, https://moel.go.kr/news/enews/report/enewsView.do?news_seq=19659)
+- 2026-11-25 [understanding] intro는 답하거나 건너뛸 때까지 `main.sections.is-gated`(블러·접힘) + 이후 섹션 `inert`; 체감 답은 `eg.u.felt`에 `seed@startedAt` 키로 로컬 저장 — 목차는 쓸 수 있고 포커스·보조기기는 막음, 새 세션은 다시 물음
+- 2026-11-25 [understanding] debrief의 이벤트 마커는 차트 아래 별도 SVG 띠, 차트에는 최고점·일괄 지급만 표시; 슬롯 변형 문장은 수업 모드에서 슬롯을 한 경우만 — 마커 수십 개가 차트를 덮지 않게
+- 2026-11-25 [understanding] stimulus의 "진 판 연출 시간"은 실제 값(LDW·기대 연출 포함, 진행음 제외)으로 표시, replayPlain은 50행 페이지 + 빨리 넘기기(4/16/64행/초) — 진 판에도 자극이 있었음을 숨기지 않음, 모바일 성능
+- 2026-11-25 [understanding] strategyCheck의 "내 전략/무작위/최적"은 플레이어 판 수 단위 블록 합의 분포로 겹쳐 그림; sim은 엣지를 고른 균등 배당 1판, 시작 잔고 = 세션 시작 크레딧, 기본 베팅 1%, 기본 엣지는 가장 많이 건 게임 — 플레이어가 체감할 수 있는 단위
+- 2026-11-25 [understanding] 슬롯 변형 비교 카드는 500판 × 100크레딧 균등 베팅 고정, 수치는 `slotStats`에서 계산; i18n 문장에 퍼센트 숫자를 직접 쓰지 않음(테스트로 강제) — §10.6
+- 2026-11-25 [understanding] caseStudy는 CONTEXT §4.8.1의 사실만, 사실마다 출처 링크(URL 없는 Daum 블로그는 제외); 실제 기계에서 자리를 뜨면 어떻게 되었는지는 출처가 없어 쓰지 않음 — §4.8.3
+- 2026-11-25 [understanding] quiz는 5문항을 한 번에 보이고 답한 뒤 해설과 내 세션 수치를 공개(사전·사후 대신 "먼저 답, 그다음 데이터"), help는 1336만 + 앱 삭제·사이트 데이터 삭제 안내 — BASE_PROMPT §6
+- 2026-11-25 [demo] gen-demo는 `scripts/gen-demo-lib.ts` + Vite `ssrLoadModule` CLI, 로비 aux는 실제 `hotGames`/`tickerItem`으로 흉내, 봇 베팅은 잔고의 2~10%, JSON 압축 저장(약 256KB, gzip 20KB); 이 시드에서는 심해전설 큐가 비어 일괄 지급 없음 — 시드는 바꾸지 않음(골라 쓰기 방지)
+- 2026-11-25 [env] Dropbox 동기화 폴더에서 `dist/` 비우기가 간헐적으로 EPERM — 다시 빌드하면 통과, CI(리눅스)에는 영향 없음. Git Bash에서 vitest가 실패하면 PowerShell/`npm test`로 실행

@@ -1,0 +1,49 @@
+/* sim: controls (touch targets ≥ 44px), job status, outputs. Reuses .stats, .chart, .card, .callout, .table-wrap. */
+.section-body > .sim-main, .section-body > .sim-slot { max-width: none; }
+.sim-main > p, .sim-main .sim-out > p, .sim-slot > p, .sim-slot p { max-width: var(--measure); }
+
+.sim-controls {
+  display: grid; gap: 18px 32px; grid-template-columns: minmax(0, 1fr); margin: 8px 0 20px; padding: 16px;
+  background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+}
+@media (min-width: 900px) { .sim-controls { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.sim-ctl { min-width: 0; margin: 0; padding: 0; border: 0; }
+.sim-ctl-label { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 0; margin: 0 0 4px; font-weight: 600; font-size: 0.9375rem; }
+.sim-ctl-value { font-weight: 600; color: var(--accent-ink); font-variant-numeric: tabular-nums; }
+.sim-ctl input[type="range"] { display: block; width: 100%; min-height: 44px; margin: 0; accent-color: var(--accent); touch-action: pan-y; }
+.sim-hint { margin: 6px 0 0; font-size: 0.8125rem; }
+
+.sim-presets { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 0; }
+.sim-chip {
+  min-height: 44px; padding: 0 12px; font: inherit; font-size: 0.8125rem; color: var(--ink-2); background: transparent;
+  border: 1px solid var(--line); border-radius: 999px; cursor: pointer; font-variant-numeric: tabular-nums;
+}
+.sim-chip:hover { border-color: var(--accent); color: var(--accent-ink); }
+
+.sim-seg { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.sim-seg-opt { position: relative; display: flex; }
+.sim-seg-opt input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.sim-seg-opt span {
+  flex: 1; display: flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 8px; text-align: center;
+  font-size: 0.875rem; color: var(--ink-2); border: 1px solid var(--line); border-radius: 8px; cursor: pointer;
+}
+.sim-seg-opt input:checked + span { color: var(--accent-ink); background: var(--accent-soft); border-color: var(--accent); font-weight: 600; }
+.sim-seg-opt input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.sim-job { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 0 0 12px; font-size: 0.875rem; color: var(--ink-2); }
+.sim-job[hidden] { display: none; }
+.sim-job-bar { flex: 1 1 160px; max-width: 320px; height: 6px; accent-color: var(--accent); }
+.sim-job-failed { color: var(--muted); }
+
+.sim-out.is-stale { opacity: 0.55; }
+.sim-out[hidden] { display: none; }
+.sim-out > .chart { max-width: none; }
+.sim-paths .chart-readout { display: none; }
+.sim-top { margin: 8px 0 12px; max-width: var(--measure); }
+.sim-top p { margin: 4px 0 0; }
+
+.sim-slot { margin: 40px 0 0; }
+.sim-slot h3 { margin-top: 0; }
+.sim-sub { margin: 24px 0 8px; font-size: 1rem; font-weight: 600; color: var(--ink-2); }
+.sim-slot .table-wrap th[scope="row"] { font-size: 0.9375rem; font-weight: 400; color: var(--ink); }
+@media (max-width: 480px) { .sim-slot { padding: 16px 12px; } }

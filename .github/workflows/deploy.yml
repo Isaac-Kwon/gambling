@@ -27,6 +27,7 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm run typecheck
       - run: npm test
+      - run: npm run gen:demo -- --check
       - run: npm run rtp
       - run: npm run build
         env:

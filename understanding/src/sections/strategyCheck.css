@@ -1,0 +1,18 @@
+/* strategyCheck: one block per game played; reuses .stats, .table-wrap, .chart from style.css. */
+.section-body > .sc-game { max-width: none; }
+.sc-game > p, .sc-game > ul, .sc-arms > p { max-width: var(--measure); }
+.sc-game .stats { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); max-width: 820px; }
+.sc-game { margin: 0 0 8px; padding: 8px 0 0; }
+.sc-game + .sc-game { margin-top: 28px; border-top: 1px solid var(--line); }
+.sc-game > h3 { margin-top: 24px; }
+.sc-rounds { margin: -4px 0 12px; font-size: 0.875rem; }
+.sc-sub { margin: 24px 0 8px; font-size: 1rem; font-weight: 600; color: var(--ink-2); }
+.sc-caption { margin: 0 0 4px; font-size: 0.875rem; color: var(--ink-2); }
+.sc-note { font-size: 0.875rem; }
+.sc-findings li { margin: 0 0 6px; }
+.section-body .sc-game > .chart, .section-body .sc-game > .table-wrap, .section-body .sc-game > .stats,
+.section-body .sc-arms > .chart, .section-body .sc-arms > .table-wrap { max-width: none; }
+
+.sc-job { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin: 8px 0 16px; font-size: 0.875rem; color: var(--ink-2); }
+.sc-job-bar { flex: 1 1 160px; max-width: 320px; height: 6px; accent-color: var(--accent); }
+.sc-job-failed { color: var(--muted); }

@@ -1,0 +1,22 @@
+{
+  "intro.lead": "",
+  "intro.demo": "",
+  "intro.q.minutes": "",
+  "intro.unit.minutes": "",
+  "intro.q.result": "",
+  "intro.opt.won": "",
+  "intro.opt.lost": "",
+  "intro.opt.even": "",
+  "intro.amount": "",
+  "intro.unit.credits": "",
+  "intro.btn.show": "",
+  "intro.btn.skip": "",
+  "intro.btn.edit": "",
+  "intro.gate.hint": "",
+  "intro.err.number": "",
+  "intro.err.empty": "",
+  "intro.saved": "",
+  "intro.saved.minutes": "",
+  "intro.saved.net": "",
+  "intro.skipped": ""
+}

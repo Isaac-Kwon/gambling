@@ -1,0 +1,22 @@
+{
+  "intro.lead": "기록을 보기 전에 두 가지만 적어 주세요. 기억에 남은 느낌 그대로면 됩니다. 답은 이 기기 안에만 저장되고 어디로도 보내지 않습니다.",
+  "intro.demo": "지금 보고 있는 것은 미리 만들어 둔 데모 세션입니다.",
+  "intro.q.minutes": "몇 분 정도 플레이했다고 느끼나요?",
+  "intro.unit.minutes": "분",
+  "intro.q.result": "결과적으로 얼마를 땄거나 잃었다고 느끼나요?",
+  "intro.opt.won": "땄다",
+  "intro.opt.lost": "잃었다",
+  "intro.opt.even": "거의 본전",
+  "intro.amount": "대략 몇 크레딧인지",
+  "intro.unit.credits": "크레딧",
+  "intro.btn.show": "답하고 기록 보기",
+  "intro.btn.skip": "답하지 않고 보기",
+  "intro.btn.edit": "답 고치기",
+  "intro.gate.hint": "아래 내용은 답하거나 건너뛰면 열립니다.",
+  "intro.err.number": "0 이상의 숫자로 적어 주세요.",
+  "intro.err.empty": "하나 이상 적어 주세요. 적고 싶지 않으면 아래의 건너뛰기를 누르세요.",
+  "intro.saved": "답을 저장했습니다.",
+  "intro.saved.minutes": "느낀 시간 {v}분",
+  "intro.saved.net": "느낀 손익 {v} 크레딧",
+  "intro.skipped": "답하지 않고 넘어갔습니다. 아래 내용은 모두 볼 수 있습니다."
+}

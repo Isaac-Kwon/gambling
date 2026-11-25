@@ -1,0 +1,19 @@
+/* Gate: until the intro is answered or skipped, the sections below are collapsed and blurred (also `inert`, set by intro.ts). */
+main.sections.is-gated > .section:not([data-section="intro"]) > .section-body {
+  max-height: 7rem; overflow: hidden; filter: blur(6px); opacity: 0.5; pointer-events: none; user-select: none;
+}
+main.sections.is-gated > .section:not([data-section="intro"]) { padding-bottom: 0; }
+.intro-form { display: grid; gap: 22px; margin: 0 0 12px; }
+.intro-form fieldset { border: 0; margin: 0; padding: 0; min-width: 0; }
+.intro-form legend, .intro-form label.q { display: block; padding: 0; margin: 0 0 8px; font-weight: 600; }
+.intro-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.intro-form input[type="text"] {
+  width: 9rem; min-height: 44px; padding: 0 12px; font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; font-variant-numeric: tabular-nums;
+}
+.intro-opt { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; }
+.intro-opt input { width: 18px; height: 18px; accent-color: var(--accent); }
+.intro-unit { color: var(--ink-2); }
+.intro-actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.intro-err { margin: 0; color: var(--ink-2); font-size: 0.875rem; min-height: 1.4em; }
+.intro-answered p { margin: 0 0 12px; }

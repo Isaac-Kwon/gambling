@@ -1,0 +1,5 @@
+.stim-fakes { list-style: none; padding: 0 !important; margin: 0 0 1em; }
+.stim-fakes li { padding: 8px 0; border-bottom: 1px solid var(--line); }
+.stim-ex { margin: 4px 0 0 !important; padding-left: 1.1em !important; color: var(--muted); font-size: 0.875rem; }
+.stim-ex li { padding: 0; border: 0; }
+.stim-note { font-size: 0.875rem; color: var(--muted); }

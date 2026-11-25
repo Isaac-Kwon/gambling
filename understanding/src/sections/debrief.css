@@ -1,0 +1,17 @@
+.dbf-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (min-width: 720px) { .dbf-stats { grid-template-columns: repeat(6, minmax(0, 1fr)); } }
+.dbf-list { list-style: disc; }
+.dbf-list li { margin: 0 0 0.6em; }
+.dbf-felt p { margin: 0 0 0.6em; }
+.dbf-help { margin-top: 32px; }
+.dbf-help .btn { text-decoration: none; }
+
+/* marker strip: one thin row per marker kind, same time scale (not pixel-aligned with the chart axes) */
+.dbf-strip { display: grid; gap: 6px; margin: 4px 0 20px; max-width: 880px; }
+.dbf-strip-row { display: grid; grid-template-columns: minmax(6.5rem, 9rem) 1fr; align-items: center; gap: 10px; font-size: 0.8125rem; color: var(--ink-2); }
+.dbf-strip-svg { width: 100%; height: 14px; background: var(--accent-soft); border-radius: 3px; }
+.dbf-strip-svg line { stroke: var(--chart-s1); stroke-width: 2; vector-effect: non-scaling-stroke; }
+.dbf-strip-svg.k-ldw line { stroke: var(--chart-s2); }
+.dbf-strip-svg.k-chase line { stroke: var(--chart-s3); }
+.dbf-strip-svg.k-omen line { stroke: var(--chart-s4); }
+.dbf-strip-svg.k-flush line { stroke: var(--ink); }

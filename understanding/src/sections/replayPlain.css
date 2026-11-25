@@ -1,0 +1,10 @@
+.rp-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 12px; }
+.rp-controls .btn { min-width: 44px; padding: 0 14px; }
+.rp-speed { display: inline-flex; gap: 6px; }
+.rp-speed .btn[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-ink); }
+.rp-status { margin: 0 0 8px; font-size: 0.875rem; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+.rp-table td, .rp-table th { padding-right: 10px; white-space: nowrap; }
+.rp-table tr.flush td { background: var(--accent-soft); font-style: italic; }
+.rp-pager { display: flex; gap: 8px; align-items: center; margin: 0 0 20px; }
+.rp-pager span { font-size: 0.875rem; color: var(--muted); min-width: 6em; text-align: center; }
+.rp-question { margin: 28px 0 0; font-size: 1.125rem; font-weight: 600; max-width: var(--measure); }

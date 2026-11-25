@@ -1,0 +1,17 @@
+{
+  "help.data.android": "Chrome: 설정 → 사이트 설정 → 모든 사이트에서 이 사이트를 찾아 '데이터 삭제'를 누릅니다.",
+  "help.data.desktop": "Chrome·Edge: 주소창 왼쪽의 아이콘 → 사이트 설정 → '데이터 삭제'를 누릅니다.",
+  "help.data.intro": "이 기기에는 세션 기록과 언어 설정이 브라우저 저장소에 남아 있을 수 있습니다. 브라우저의 사이트 설정에서 지울 수 있습니다.",
+  "help.data.ios": "Safari: 설정 → Safari → 고급 → 웹사이트 데이터에서 이 사이트를 찾아 삭제합니다.",
+  "help.data.title": "저장된 데이터 지우기",
+  "help.intro": "게임을 하다가 멈추기 어렵다고 느꼈다면, 혼자 견디지 않아도 됩니다. 이야기할 곳이 있습니다.",
+  "help.line.call": "1336에 전화하기",
+  "help.line.hours": "1336 · 24시간",
+  "help.line.name": "한국도박문제예방치유원 도박문제 상담전화",
+  "help.line.title": "상담 전화",
+  "help.remove.android": "Android (Chrome): 홈 화면이나 앱 목록에서 아이콘을 길게 누릅니다. '앱 삭제' 또는 '앱 정보'를 고른 뒤 '삭제'를 누릅니다.",
+  "help.remove.desktop": "데스크톱 Chrome·Edge: 설치한 앱 창의 오른쪽 위 메뉴(⋮ 또는 …)를 열고 '제거'(Uninstall)를 고릅니다.",
+  "help.remove.intro": "이 사이트를 앱으로 설치했다면 다음 방법으로 지울 수 있습니다.",
+  "help.remove.ios": "iPhone·iPad: 홈 화면에서 아이콘을 길게 누르고 '앱 제거'를 고른 뒤 '홈 화면에서 삭제'를 누릅니다.",
+  "help.remove.title": "설치한 앱 지우기"
+}

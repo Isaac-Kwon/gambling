@@ -103,18 +103,38 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
   let losses = 0;
   let lostTimer: ReturnType<typeof setTimeout> | undefined;
 
+  // Emits whose anchor is read lazily: born at the start of the next frame (count reserved now).
+  const pending: { kind: EmitKind; n: number; at: () => GfxRect | null; ms: number; rnd: () => number }[] = [];
+  let reserved = 0;
+  const flushPending = (): void => {
+    if (!pending.length) return;
+    const list = pending.splice(0);
+    reserved = 0;
+    for (const p of list) {
+      let r: GfxRect | null = null;
+      try { r = p.at(); } catch { r = null; }
+      sim.spawn(p.kind, p.n, r, p.ms, p.rnd);
+    }
+  };
+  const dropPending = (): void => { pending.length = 0; reserved = 0; };
+
   const layer: GfxLayer = {
     get alive() { return alive && !dead; },
-    get busy() { return !dead && (sim.count > 0 || rays.length > 0 || focusA > 0 || clock < focusUntil || needsClear); },
+    get busy() { return !dead && (sim.count > 0 || pending.length > 0 || rays.length > 0 || focusA > 0 || clock < focusUntil || needsClear); },
     get quality() { return dead ? "off" : q; },
     onDrop: null,
 
     emit(kind, n, at, ms, seed) {
       if (!alive || dead || !(n > 0) || !(ms > 0)) return 0;
       const rnd = seed !== undefined ? jitter(seed) : () => o.pre.float();
-      if (kind === "rays") return addRays(Math.min(16, Math.floor(n)), at, ms);
+      if (kind === "rays") return addRays(Math.min(16, Math.floor(n)), typeof at === "function" ? at() : at, ms);
       if (!(kind in KIND_ID)) return 0;
-      return sim.spawn(kind as EmitKind, n, at, ms, rnd);
+      if (typeof at !== "function") return sim.spawn(kind as EmitKind, n, at, ms, rnd);
+      const m = Math.min(Math.floor(n), Math.max(0, sim.cap - sim.count - reserved));
+      if (m <= 0) return 0;
+      pending.push({ kind: kind as EmitKind, n: m, at, ms, rnd });
+      reserved += m;
+      return m;
     },
 
     glow(at, k, ms) {
@@ -135,6 +155,7 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
       if (dead || !alive || suspended) return;
       const dt = Math.min(100, Math.max(0, dtMs));
       clock += dt;
+      flushPending();
       const has = sim.count > 0 || rays.length > 0 || focusA > 0 || clock < focusUntil;
       if (!has) {
         if (needsClear) { safeRender(); needsClear = false; }
@@ -158,6 +179,7 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
     resize(cssW, cssH) {
       if (dead) return;
       W = Math.max(1, cssW); H = Math.max(1, cssH);
+      res = Math.min(dpr(), QUALITY[q].scale);   // zoom / moving to another screen changes the DPR too
       sim.setBounds(W, H);
       try { renderer.resize(W, H, res); } catch { /* lost context: Pixi resizes on restore */ }
       needsClear = true;
@@ -173,6 +195,7 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
     resume() { suspended = false; },
 
     stop() {
+      dropPending();
       sim.fade(FADE_MS);
       for (const r of rays) if (r.stopAt < 0) { r.stopAt = r.t; r.stopAlpha = rayAlpha(r); }
       focusUntil = clock;
@@ -185,6 +208,7 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
       alive = false;
       if (lostTimer !== undefined) clearTimeout(lostTimer);
       ro?.disconnect();
+      dropPending();
       canvas.removeEventListener("webglcontextlost", onLost);
       canvas.removeEventListener("webglcontextrestored", onRestored);
       sim.clear();
@@ -345,6 +369,7 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
     if (dead) return;
     alive = false;
     sim.clear();
+    dropPending();
     for (const r of rays) { raysLayer.removeChild(r.cont); r.cont.destroy({ children: true }); }
     rays.length = 0;
     focusA = 0; focusUntil = 0;
@@ -386,5 +411,53 @@ export async function createStage(host: HTMLElement, o: LoadGfxOptions): Promise
   host.appendChild(canvas);
   safeRender();
   o.onChange?.({ b: "gl", q });
+  scheduleWarmUp();
   return layer;
+
+  /**
+   * The first frame that draws particles / additive sprites compiles their shader programs, generates the
+   * uniform-sync and particle-update functions and uploads the atlas: ~15 ms on a desktop, 50+ ms on a
+   * throttled phone, landing exactly on the first frame of a celebration. Do it once, invisibly, while
+   * the player is still in the lobby: one idle slice per pipeline (particles, then sprites).
+   */
+  function scheduleWarmUp(): void {
+    const steps: (() => void)[] = [
+      () => {
+        // ParticleContainer pipe: both blend modes, both containers' buffers.
+        const pn = new Particle({ texture: T.coin[0], x: -64, y: -64, alpha: 0 });
+        const pa = new Particle({ texture: T.spark, x: -64, y: -64, alpha: 0 });
+        pcNormal.particleChildren = [pn]; pcAdd.particleChildren = [pa];
+        pcNormal.update(); pcAdd.update();
+        safeRender();
+        pcNormal.particleChildren = normOn; pcAdd.particleChildren = addOn;
+        pcNormal.update(); pcAdd.update();
+      },
+      () => {
+        // Batcher (sprites) with additive blend. alpha 0 would be culled from the build, so use a sliver.
+        const s = new Sprite(T.ray);
+        s.blendMode = "add"; s.alpha = 0.001; s.position.set(-64, -64);
+        raysLayer.addChild(s);
+        safeRender();
+        raysLayer.removeChild(s);
+        s.destroy();
+      },
+    ];
+    const idle = (fn: () => void): void => {
+      const ric = (globalThis as { requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number }).requestIdleCallback;
+      if (typeof ric === "function") ric(fn, { timeout: 1500 });
+      else setTimeout(fn, 120);
+    };
+    const next = (): void => {
+      const step = steps.shift();
+      if (!step) return;
+      idle(() => {
+        // Busy or gone: a real frame will compile what it needs; skip the remaining steps.
+        if (dead || !alive || sim.count > 0 || pending.length > 0 || rays.length > 0 || focusA > 0) return;
+        try { step(); } catch { /* warm-up is best effort */ }
+        safeRender();   // leave a cleared canvas
+        next();
+      });
+    };
+    next();
+  }
 }

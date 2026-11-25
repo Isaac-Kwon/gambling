@@ -239,6 +239,9 @@ function heartbeat(k: Kit, p0: number, buf: BufCache): LoopVoice {
   };
 }
 
+/** Buffers the loops render on first use, by cache key (pre-rendered during idle time by the engine). */
+export const LOOP_BUFFERS: Readonly<Record<string, (ac: BaseAudioContext) => AudioBuffer>> = { clicks: renderClicks, beat: renderBeat };
+
 export function makeLoop(name: LoopName, k: Kit, pitch: number, buf: BufCache): LoopVoice | null {
   switch (name) {
     case 'ambient':

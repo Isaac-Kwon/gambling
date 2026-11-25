@@ -176,7 +176,19 @@ export function createSlotView(root: HTMLElement, ctx: GameCtx): SlotView {
 
   // ---------------------------------------------------------------- layout
   let ch = 0;
+  // Reel centres and window width for the win lines. Measured once per layout change (in a frame where
+  // layout is already clean), so drawing the lines when a spin settles never forces a synchronous layout.
+  let geom: { W: number; xs: number[] } | null = null;
+  let geomRaf = 0;
+  const measureGeom = (): { W: number; xs: number[] } => {
+    geom ??= { W: reelsWrap.clientWidth, xs: [...reels.el.children].map((c) => (c as HTMLElement).offsetLeft + (c as HTMLElement).offsetWidth / 2) };
+    return geom;
+  };
   const layout = (): void => {
+    geom = null;
+    if (!geomRaf && typeof requestAnimationFrame === "function") {
+      geomRaf = requestAnimationFrame(() => { geomRaf = 0; measureGeom(); });
+    }
     const H = root.clientHeight || screen.clientHeight;
     const W = reelsWrap.clientWidth;
     if (!(H > 0 && W > 0)) return;
@@ -208,9 +220,9 @@ export function createSlotView(root: HTMLElement, ctx: GameCtx): SlotView {
   const drawLines = (plan: SpinPlan | null): void => {
     lines.replaceChildren();
     if (!plan || plan.wins.length === 0) return;
-    const W = reelsWrap.clientWidth, Hh = ch * PEEK_ROWS;
+    const { W, xs } = measureGeom();
+    const Hh = ch * PEEK_ROWS;
     lines.setAttribute("viewBox", `0 0 ${W.toFixed(1)} ${Hh.toFixed(1)}`);
-    const xs = [...reels.el.children].map((c) => (c as HTMLElement).offsetLeft + (c as HTMLElement).offsetWidth / 2);
     const rows = cfg.lines;
     for (const w of plan.wins) {
       const pts = rows[w.line].map((row, i) => [xs[i] ?? 0, (row + 0.35 + 0.5) * ch] as const);
@@ -314,6 +326,8 @@ export function createSlotView(root: HTMLElement, ctx: GameCtx): SlotView {
       warm();
     },
     destroy() {
+      if (geomRaf) cancelAnimationFrame(geomRaf);
+      geomRaf = 0;
       for (const f of offs.splice(0)) f();
       mo.disconnect();
       sh?.close();

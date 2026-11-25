@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createSfx, MASTER_CAP, MAX_VOICES, SPECS, type SfxDoc } from './sfx';
+import { createSfx, MASTER_CAP, MAX_VOICES, PRERENDERED, SPECS, type SfxDoc } from './sfx';
 import { riseFreq } from './sfx/loops';
 import { MIN_ATTACK } from './sfx/kit';
 import type { SfxName } from './types';
@@ -460,5 +460,58 @@ describe('sfx: never throws', () => {
   it('when every method of the context throws', async () => {
     const bad = new Proxy({}, { get: () => { throw new Error('dead'); } });
     await exercise(createSfx({ createContext: () => bad as AudioContext, doc: null }));
+  });
+});
+
+describe('sfx: pre-rendered sounds', () => {
+  /** Offline context on the fake graph: rendering resolves with a buffer of the requested length. */
+  class FakeOffline extends FakeCtx {
+    constructor(readonly len: number, sr: number) { super(); this.sampleRate = sr; }
+    startRendering() { return Promise.resolve(this.createBuffer(1, this.len, this.sampleRate)); }
+  }
+  const flush = async (until: () => boolean, maxMs = 4000) => {
+    for (let t = 0; t < maxMs && !until(); t += 20) await new Promise((r) => setTimeout(r, 20));
+    await new Promise((r) => setTimeout(r, 100));
+  };
+
+  it('jingles and the spin / celebration one-shots become single buffer sources after idle pre-rendering', async () => {
+    const ctx = new FakeCtx();
+    const offline: FakeOffline[] = [];
+    const sfx = createSfx({
+      createContext: () => ctx as unknown as AudioContext, doc: null, prerender: true,
+      createOffline: (_c, len, sr) => { const o = new FakeOffline(len, sr); offline.push(o); return o as unknown as OfflineAudioContext; },
+    });
+    await sfx.unlock();
+    await flush(() => offline.length >= PRERENDERED.length);
+    expect(offline.length).toBe(PRERENDERED.length);
+    for (const [name, pitch] of PRERENDERED) {
+      const before = new Set(ctx.nodes);
+      ctx.currentTime += 1;
+      sfx.play(name, { k: 0.5, pitch });
+      const added = ctx.nodes.filter((n) => !before.has(n));
+      const srcs = sources(added);
+      expect(srcs, `${name}@${pitch}`).toHaveLength(1);
+      expect(srcs[0]).toBeInstanceOf(FakeBufSrc);
+      expect((srcs[0] as FakeBufSrc).buffer).not.toBeNull();
+    }
+    // Another pitch is still synthesized live.
+    const before = new Set(ctx.nodes);
+    ctx.currentTime += 1;
+    sfx.play('stop', { pitch: 1.5 });
+    expect(sources(ctx.nodes.filter((n) => !before.has(n))).length).toBeGreaterThan(1);
+  });
+
+  it('is off by default when a context factory is injected, and never throws without OfflineAudioContext', async () => {
+    const ctx = new FakeCtx();
+    const sfx = createSfx({ createContext: () => ctx as unknown as AudioContext, doc: null });
+    await sfx.unlock();
+    await flush(() => false, 200);
+    const before = new Set(ctx.nodes);
+    sfx.play('win3');
+    expect(sources(ctx.nodes.filter((n) => !before.has(n))).length).toBeGreaterThan(5);
+    const sfx2 = createSfx({ createContext: () => new FakeCtx() as unknown as AudioContext, doc: null, prerender: true, createOffline: () => { throw new Error('no offline'); } });
+    await sfx2.unlock();
+    await flush(() => false, 200);
+    sfx2.play('win3');
   });
 });

@@ -107,8 +107,8 @@ export function mountHud(host: HTMLElement, o: HudOptions): Hud {
     const ms = o.fxOn ? countMs(delta) : 0;
     if (ms === 0 || balance <= shown) { endTween(); return; }
     from = shown; t0 = clock.now(); dur = ms; elapsed = 0;
-    balBox.classList.remove('is-up');
-    void balBox.offsetWidth;
+    // A state class (the glow fades in by transition), not a restarted animation: no reflow needed. A
+    // forced layout here would land in the settle task, right before the celebration starts.
     balBox.classList.add('is-up');
     if (!stopFrame) {
       stopFrame = clock.frame((dt) => {

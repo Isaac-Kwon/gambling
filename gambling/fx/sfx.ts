@@ -19,7 +19,7 @@
  */
 import type { Sfx, SfxName } from './types';
 import { clamp, makeImpulse, makeNoise, type Kit } from './sfx/kit';
-import { makeLoop, type BufCache, type LoopName, type LoopVoice } from './sfx/loops';
+import { LOOP_BUFFERS, makeLoop, type BufCache, type LoopName, type LoopVoice } from './sfx/loops';
 import { RECIPES } from './sfx/voices';
 
 /** Hard cap of the master gain (ARCHITECTURE §6.4: master 0.5 + limiter). */
@@ -74,6 +74,44 @@ export interface SfxOptions {
   maxVoices?: number;
   /** Diagnostics hook for errors swallowed while building a voice (never rethrown). */
   onError?: (e: unknown) => void;
+  /**
+   * Pre-render the tier jingles into buffers (OfflineAudioContext) during idle time after `unlock()`, so a
+   * celebration starts one buffer source instead of building ~100 synth nodes on the main thread in the
+   * celebration's first frame. Default: on when no `createContext` is injected (i.e. in the browser).
+   */
+  prerender?: boolean;
+  /** OfflineAudioContext factory (tests). Default: window.OfflineAudioContext / webkitOfflineAudioContext. */
+  createOffline?: (channels: number, length: number, sampleRate: number) => OfflineAudioContext | null;
+}
+
+/**
+ * Sounds rendered ahead of time as [name, pitch]: the tier jingles (biggest first: they are the expensive
+ * ones) and the one-shots a spin and a celebration start with (tap, the reel stops at their pitches, coin
+ * drops). Any other pitch is synthesized live as before.
+ */
+export const PRERENDERED: readonly (readonly [SfxName, number])[] = [
+  ['win4', 1], ['win3', 1], ['win2', 1], ['win1', 1], ['win0', 1], ['tap', 1],
+  ['stop', 1], ['stop', 1.04], ['stop', 1.08], ['stop', 1.12], ['stop', 1.16],
+  ['coin', 1], ['coin', 1.08], ['coin', 1.16], ['coin', 1.24], ['level', 1],
+];
+const preKey = (name: SfxName, p: number): string => `${name}@${p.toFixed(3)}`;
+/** Upper bound of a jingle's length in seconds (the rendered buffer is trimmed to the recipe's real end). */
+const PRERENDER_MAX_S = 6;
+
+type OfflineCtor = new (channels: number, length: number, sampleRate: number) => OfflineAudioContext;
+function defaultOffline(channels: number, length: number, sampleRate: number): OfflineAudioContext | null {
+  const g = globalThis as unknown as { OfflineAudioContext?: OfflineCtor; webkitOfflineAudioContext?: OfflineCtor };
+  const C = g.OfflineAudioContext ?? g.webkitOfflineAudioContext;
+  return C ? new C(channels, length, sampleRate) : null;
+}
+
+function onIdle(fn: () => void): void {
+  const g = globalThis as unknown as {
+    requestIdleCallback?: (cb: () => void, o?: { timeout: number }) => number;
+    setTimeout?: (f: () => void, ms: number) => unknown;
+  };
+  if (typeof g.requestIdleCallback === 'function') g.requestIdleCallback(fn, { timeout: 2000 });
+  else if (typeof g.setTimeout === 'function') g.setTimeout(fn, 60);
 }
 
 export interface SfxEngine extends Sfx {
@@ -146,6 +184,10 @@ export function createSfx(o: SfxOptions = {}): SfxEngine {
   const dying: Voice[] = [];
   const last = new Map<SfxName, number>();
   const bufs = new Map<string, AudioBuffer>();
+  const doPrerender = o.prerender ?? !o.createContext;
+  const createOffline = o.createOffline ?? defaultOffline;
+  const jingles = new Map<string, { buf: AudioBuffer; dur: number }>();
+  let prerenderStarted = false;
   const loops: Record<LoopName, { on: boolean; pitch: number; v: LoopVoice | null; out: GainNode | null; send: GainNode | null }> = {
     ambient: { on: false, pitch: 1, v: null, out: null, send: null },
     spin: { on: false, pitch: 1, v: null, out: null, send: null },
@@ -381,12 +423,30 @@ export function createSfx(o: SfxOptions = {}): SfxEngine {
       const { out, send } = outFor(spec.rev);
       const t = now + 0.005;
       const k = kit(out, t, p, g, seq++);
-      try {
-        recipe(k, arg);
-      } catch (e) {
-        halt(k.srcs);
-        k.srcs.length = 0;
-        report(e);
+      const pre = jingles.size ? jingles.get(preKey(name, p)) : undefined;
+      if (pre) {
+        // Pre-rendered at k = 1: the voice gain scales it (envelopes are linear in k below the 0..1 clamp).
+        try {
+          const src = c.createBufferSource();
+          src.buffer = pre.buf;
+          out.gain.value = g;
+          src.connect(out);
+          src.start(t);
+          k.srcs.push(src);
+          k.end = t + pre.dur;
+        } catch (e) {
+          halt(k.srcs);
+          k.srcs.length = 0;
+          report(e);
+        }
+      } else {
+        try {
+          recipe(k, arg);
+        } catch (e) {
+          halt(k.srcs);
+          k.srcs.length = 0;
+          report(e);
+        }
       }
       if (!k.srcs.length) {
         try {
@@ -402,6 +462,66 @@ export function createSfx(o: SfxOptions = {}): SfxEngine {
     } catch {
       /* never throw */
     }
+  }
+
+  /** Renders one jingle offline (graph built now, audio rendered off the main thread), then the next one. */
+  function prerenderNext(queue: (readonly [SfxName, number])[]): void {
+    if (disposed || !ac || !chain || !queue.length) return;
+    const [name, pitch] = queue.shift()!;
+    const recipe = RECIPES[name];
+    const sr = ac.sampleRate;
+    const maxS = name.startsWith('win') || name === 'level' ? PRERENDER_MAX_S : 1;
+    let oc: OfflineAudioContext | null = null;
+    try {
+      oc = createOffline(1, Math.ceil(sr * maxS), sr);
+    } catch {
+      oc = null;
+    }
+    if (!oc || !recipe) return;
+    const offline = oc;
+    let k: Kit;
+    try {
+      const out = offline.createGain();
+      out.gain.value = 1;
+      out.connect(offline.destination);
+      k = { ac: offline, out, t: 0, p: pitch, g: 1, noise: chain.noise, srcs: [], end: 0, seed: 0 };
+      recipe(k, pitch);
+    } catch (e) {
+      report(e);
+      onIdle(() => prerenderNext(queue));
+      return;
+    }
+    const dur = Math.min(maxS, Math.max(0.05, k.end + 0.02));
+    const done = (rendered: AudioBuffer): void => {
+      try {
+        if (disposed || !ac) return;
+        const n = Math.min(rendered.length, Math.ceil(dur * sr));
+        const b = ac.createBuffer(1, n, sr);
+        b.getChannelData(0).set(rendered.getChannelData(0).subarray(0, n));
+        jingles.set(preKey(name, pitch), { buf: b, dur });
+      } catch (e) {
+        report(e);
+      }
+      onIdle(() => prerenderNext(queue));
+    };
+    try {
+      const r = offline.startRendering();
+      if (r && typeof r.then === 'function') r.then(done, report);
+      else (offline as unknown as { oncomplete: ((e: { renderedBuffer: AudioBuffer }) => void) | null }).oncomplete = (e) => done(e.renderedBuffer);
+    } catch (e) {
+      report(e);
+    }
+  }
+
+  function startPrerender(): void {
+    if (prerenderStarted || !doPrerender) return;
+    prerenderStarted = true;
+    const queue = [...PRERENDERED];
+    onIdle(() => {
+      // Loop buffers (reel clicks, heartbeat) are rendered in JS on first use: do that now as well.
+      for (const [key, render] of Object.entries(LOOP_BUFFERS)) buf(key, render);
+      prerenderNext(queue);
+    });
   }
 
   function syncLoop(name: LoopName): void {
@@ -524,6 +644,7 @@ export function createSfx(o: SfxOptions = {}): SfxEngine {
       }
       unlocked = true;
       poke(ac);
+      startPrerender();
       if (!hidden()) paused = false;
       return paused ? resolved() : kick();
     } catch {

@@ -51,6 +51,30 @@ describe("quality state machine", () => {
     expect(r.s.q).toBe(2);
   });
 
+  it("on a 60 Hz display (frames never below 16.7 ms) a smooth layer still climbs back up", () => {
+    const r = feed(qualityInit(0), 1000 / 60, 1500);   // 25 s
+    expect(r.changes).toEqual([1, 2]);
+    expect((r.at[0] * 1000) / 60).toBeGreaterThanOrEqual(10_000);
+  });
+
+  it("a 60 Hz layer that is only just keeping up (20 ms average) does not climb", () => {
+    let s = qualityInit(1);
+    s = feed(s, 1000 / 60, 10).s;           // learns the refresh interval
+    const r = feed(s, 20, 3000);            // 60 s
+    expect(r.changes).toEqual([]);
+  });
+
+  it("each step down doubles the time needed for the next step up", () => {
+    let s = qualityInit(2);
+    s = feed(s, 1000 / 60, 10).s;
+    while (s.q === 2) s = qualityStep(s, 30);   // 2 → 1
+    expect(s.q).toBe(1);
+    let r = feed(s, 1000 / 60, Math.ceil(15_000 / (1000 / 60)));
+    expect(r.changes).toEqual([]);           // 15 s is not enough after one step down
+    r = feed(r.s, 1000 / 60, Math.ceil(6_000 / (1000 / 60)));
+    expect(r.changes).toEqual([2]);          // ~20 s
+  });
+
   it("at level 0, EMA above 40 ms for 5 s turns the layer off; nothing after that", () => {
     const r = feed(qualityInit(0), 50, 200);
     expect(r.changes).toEqual(["off"]);

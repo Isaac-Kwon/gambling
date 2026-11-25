@@ -20,8 +20,13 @@ export interface GfxLayer {
   readonly quality: QualityLevel;
   /** Set by the DOM backend: called when live particles are dropped (context lost / layer removed). */
   onDrop: (() => void) | null;
-  /** Emits up to `n` of `kind`; returns the count actually emitted (cap, quality). `seed` makes the spray deterministic. */
-  emit(kind: string, n: number, at: GfxRect | null, ms: number, seed?: number): number;
+  /**
+   * Emits up to `n` of `kind`; returns the count actually emitted (cap, quality). `seed` makes the spray deterministic.
+   * `at` may be a function: the count is decided (and reserved) now, the rectangle is read and the particles
+   * are born at the start of the next `frame()` — so an emit from a timer or input task never forces a
+   * synchronous layout; the frame reads the rect where layout is computed anyway.
+   */
+  emit(kind: string, n: number, at: GfxRect | null | (() => GfxRect | null), ms: number, seed?: number): number;
   /** Additive focus glow at `at` (null = centre), intensity 0..1; repeated calls move and extend it. */
   glow(at: GfxRect | null, k: number, ms: number): void;
   /** Simulate and render; does nothing (no render) when idle. */

@@ -227,10 +227,16 @@ export function startPage(app: App): void {
       gate.close();
 
       // Landscape phone (rotate cover showing): hold time and effects until upright again.
+      let sideways = false;
       onRotateBlock((blocked) => {
+        sideways = blocked;
         if (rt.ended) return;
         if (blocked) { app.clock.pause(); fx.suspend(); }
         else if (document.visibilityState !== 'hidden') { app.clock.resume(); fx.resume(); }
+      });
+      // Back from the background while still sideways: the session's resume restarted time; hold it again.
+      rt.onVisibility((s) => {
+        if (s === 'visible' && sideways && !rt.ended) { app.clock.pause(); fx.suspend(); }
       });
     },
   });

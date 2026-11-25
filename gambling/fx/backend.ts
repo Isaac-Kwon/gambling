@@ -49,6 +49,11 @@ export interface FxBackend {
 }
 
 const NOOP_HANDLE: FxHandle = { stop() {}, update() {} };
+/** Shine window width as a fraction of the banner title (glow.css `.fx-banner-shinewin` width: 42%). */
+const SHINE_BAND = 0.42;
+/** Sweep start / end in window widths: from 1.2 windows left of the title to 0.2 windows past its right edge. */
+const SHINE_FROM = 1.2;
+const SHINE_TO = 1 / SHINE_BAND + 0.2;
 const noop = () => {};
 
 /**
@@ -134,6 +139,28 @@ export function createDomBackend(o: DomBackendOptions): FxBackend {
     d.style.top = `${r.y - pad}px`;
     d.style.width = `${r.w + 2 * pad}px`;
     d.style.height = `${r.h + 2 * pad}px`;
+  };
+  /**
+   * Positions an overlay over `el` without forcing a synchronous layout: no element → CSS inset (no
+   * measuring at all); an element → hidden now, measured and shown at the start of the next frame, where
+   * layout is computed anyway. Overlays are created from settle / timer tasks right after the game changed
+   * the screen, so measuring there would cost a full extra style + layout pass.
+   */
+  const placeOver = (d: HTMLElement, el: unknown, pad = 0): void => {
+    if (!isEl(el)) {
+      const s = d.style, v = `${-pad}px`;
+      s.left = v; s.top = v; s.right = v; s.bottom = v;
+      return;
+    }
+    d.style.visibility = "hidden";
+    followers.add(() => {
+      if (d.isConnected) {
+        place(d, rectOf(el) ?? frameRect(), pad);
+        d.style.visibility = "";
+      }
+      return false;
+    });
+    kick();
   };
 
   // ------------------------------------------------------------------ frame loop (only while busy)
@@ -226,12 +253,12 @@ export function createDomBackend(o: DomBackendOptions): FxBackend {
         { duration: 520, easing: "cubic-bezier(.2,.8,.3,1)", fill: "both" },
       ));
       // Shine sweep: the window moves right while its text moves left by the same amount (transform only).
-      const w = b.title.offsetWidth || 240;
-      const band = w * 0.42;
-      const from = -band * 1.2, to = w + band * 0.2;
+      // In percentages of each element's own width (window = 42 % of the title, text = the title's width),
+      // so starting a banner never forces a synchronous layout to measure the title.
       const timing: KeyframeAnimationOptions = { duration: 1700, delay: 450, iterations: Infinity, easing: "ease-in-out" };
-      bnAnims.push(b.shineWin.animate([{ transform: `translateX(${from}px)` }, { transform: `translateX(${to}px)` }], timing));
-      bnAnims.push(b.shineText.animate([{ transform: `translateX(${-from}px)` }, { transform: `translateX(${-to}px)` }], timing));
+      const pct = (v: number) => `translateX(${(v * 100).toFixed(2)}%)`;
+      bnAnims.push(b.shineWin.animate([{ transform: pct(-SHINE_FROM) }, { transform: pct(SHINE_TO) }], timing));
+      bnAnims.push(b.shineText.animate([{ transform: pct(SHINE_FROM * SHINE_BAND) }, { transform: pct(-SHINE_TO * SHINE_BAND) }], timing));
     }
     let stopped = false;
     return {
@@ -261,9 +288,8 @@ export function createDomBackend(o: DomBackendOptions): FxBackend {
 
   // ------------------------------------------------------------------ rings (win emphasis, reel antic)
   const ring = (el: unknown, cls: string, ms: number): FxHandle => {
-    const r = rectOf(el) ?? frameRect();
     const d = mk("div", `fx-ring ${cls}`, layer);
-    place(d, r, 4);
+    placeOver(d, el, 4);
     let t: ReturnType<typeof setTimeout> | undefined;
     const h: FxHandle = {
       stop() {
@@ -288,9 +314,8 @@ export function createDomBackend(o: DomBackendOptions): FxBackend {
   // ------------------------------------------------------------------ antic
   const antic = (el: unknown, kind: string, k: number, ms: number): FxHandle => {
     if (kind === "dim") {
-      const r = rectOf(el) ?? frameRect();
       const d = mk("div", "fx-dim", layer);
-      place(d, r);
+      placeOver(d, el);
       const depth = Math.max(0, Math.min(0.9, k));
       const total = Math.max(ms, 2 * DIM_RAMP_MS);
       const edge = DIM_RAMP_MS / total;
@@ -385,7 +410,9 @@ export function createDomBackend(o: DomBackendOptions): FxBackend {
     emit(kind, n, at, ms, seed) {
       const g = gfx();
       if (!g || !(n > 0)) return 0;
-      const got = g.emit(kind, n, rectOf(at), ms, seed);
+      // Anchored emits read the anchor's rect in the next frame, not now: celebrations start from the
+      // settle task right after the screen changed, where a rect read would force a synchronous layout.
+      const got = g.emit(kind, n, isEl(at) ? () => rectOf(at) : null, ms, seed);
       if (got > 0) kick();
       return got;
     },
@@ -409,9 +436,8 @@ export function createDomBackend(o: DomBackendOptions): FxBackend {
     },
     antic,
     flash(el, color, ms) {
-      const r = rectOf(el) ?? frameRect();
       const d = mk("div", "fx-flash", layer);
-      place(d, r);
+      placeOver(d, el);
       d.style.background = color;
       if (typeof d.animate !== "function") { d.remove(); return; }
       const a = d.animate([{ opacity: 0 }, { opacity: 0.72, offset: 0.22 }, { opacity: 0 }], { duration: Math.max(60, ms), easing: "ease-out", fill: "forwards" });

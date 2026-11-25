@@ -13,6 +13,7 @@ import type { GameId } from '../../shared/config';
 import { t } from '../../shared/i18n.gambling';
 import type { Rng } from '../../shared/rng';
 import type { Fx } from '../fx/types';
+import { mountInstall } from './install';
 import type { SessionRuntime } from './session';
 import type { Clock } from './types';
 import { chipArt, fmtCredits, goldText, h, icon, iconButton, logo, pill, pressable, ribbon, starPath, svgRoot, s } from './ui';
@@ -390,9 +391,10 @@ export function mountLobby(root: HTMLElement, o: LobbyOptions): () => void {
     sound.setAttribute('aria-pressed', String(rt.settings.muted));
   });
   const installSlot = h('div', 'lb-dock__slot');
-  installSlot.dataset.slot = 'install'; // Phase 6 (install button) mounts here
+  installSlot.dataset.slot = 'install'; // install.ts mounts the install button / iOS tip here
   installSlot.hidden = true;
   const dock = h('nav', 'lb-dock', [tCasino, tArcade, installSlot, sound]);
+  cleanups.push(mountInstall(installSlot));
 
   const lobby = h('div', 'lb', [scroll, dock]);
   lobby.dataset.testid = 'lobby';

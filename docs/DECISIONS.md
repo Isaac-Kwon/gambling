@@ -64,3 +64,6 @@
 - 2026-11-25 [understanding] quiz는 5문항을 한 번에 보이고 답한 뒤 해설과 내 세션 수치를 공개(사전·사후 대신 "먼저 답, 그다음 데이터"), help는 1336만 + 앱 삭제·사이트 데이터 삭제 안내 — BASE_PROMPT §6
 - 2026-11-25 [demo] gen-demo는 `scripts/gen-demo-lib.ts` + Vite `ssrLoadModule` CLI, 로비 aux는 실제 `hotGames`/`tickerItem`으로 흉내, 봇 베팅은 잔고의 2~10%, JSON 압축 저장(약 256KB, gzip 20KB); 이 시드에서는 심해전설 큐가 비어 일괄 지급 없음 — 시드는 바꾸지 않음(골라 쓰기 방지)
 - 2026-11-25 [env] Dropbox 동기화 폴더에서 `dist/` 비우기가 간헐적으로 EPERM — 다시 빌드하면 통과, CI(리눅스)에는 영향 없음. Git Bash에서 vitest가 실패하면 PowerShell/`npm test`로 실행
+- 2026-11-25 [pwa] 매니페스트 name "OROBELLE 오로벨 카지노"(§2.1 표), 아이콘은 `@resvg/resvg-js`로 `icon.svg`에서 생성해 PNG 커밋(CI는 gen:icons 생략), maskable은 #0B0612 바탕에 10% 여백 — 시스템 의존성 없음, 안전 영역
+- 2026-11-25 [pwa] `beforeinstallprompt`는 `install.ts` 모듈 로드 시점에 잡아 두고 게이트 뒤 로비 독에 "앱 설치" 버튼으로 표시; iOS Safari에서만 "홈 화면에 추가" 안내를 기기당 1회(`og.ihint`) — 게이트 때문에 로비 장착 전에 이벤트가 옴, 재방문 유도 금지
+- 2026-11-25 [pwa] Workbox의 bit.ly 안내 링크는 빌드 뒤 `stripWorkboxLinks`로 제거(번들 검사 허용 목록은 그대로) — §1.3 외부 URL 규칙 유지

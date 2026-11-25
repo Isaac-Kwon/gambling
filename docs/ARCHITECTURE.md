@@ -64,6 +64,7 @@
 - 추가: `하우스엣지`, `houseEdge`, `near miss`, `nearMiss`, `도박`, `예방`, `치유`, `오개념`, `기댓값`, `퀴즈`, `해설`, `실험`, `educat`, `addict`, `helpline`, `fallacy`, `debrief`, `disguised`, `RTP`(대소문자 구분, 단어 경계).
 - **`understanding` 특례:** gambling 그래프의 JS 전체에서 등장 횟수가 **1회 이하**이고, 그 1회는 바로 뒤에 `/`가 붙은 형태(`understanding/`)여야 한다. 이 문자열은 `gambling/src/cashout.ts`의 `const DETAIL_PATH = 'understanding/'` 한 곳에만 둔다. HTML과 매니페스트에서는 0회.
 - 외부 요청 검사: gambling 산출물과 understanding 산출물 모두에서 `https?://`를 찾고, 허용 목록(`http://www.w3.org/`로 시작하는 XML 네임스페이스, understanding의 출처 링크, **Pixi 청크 안의 `http://www.pixijs.com/`** — 콘솔 인사말용 문자열이며 `hello: false`라 출력도 요청도 없다. 2026-11-24 빌드 실측에서 Pixi 청크의 URL은 이것뿐이고 금지어는 0건)에 없으면 실패.
+- Workbox 런타임(`dist/workbox-*.js`)의 `console.warn` 안 `https://bit.ly/wb-…` 링크는 허용 목록에 넣지 않고 `vite.config.ts`의 `stripWorkboxLinks`가 빌드 뒤 지운다(2026-11-25) — 외부 URL 규칙을 느슨하게 하지 않기 위해.
 - 금지 API 검사(dist의 모든 JS): `Notification`, `PushManager`, `setAppBadge`, `periodicSync`, `storage.persist`.
 - **예산 (개정):** 재는 대상은 `index.html` 엔트리의 **정적 import 폐포**다 — 매니페스트에서 `imports`만 재귀로 따라간 JS 파일의 gzip(레벨 9) 합계. `dynamicImports`는 넣지 않는다. **250KB 초과는 실패**(초과를 받아들이려면 조정자가 DECISIONS에 기록하고 `--budget`으로 올린다).
   - **Pixi 청크는 따로 출력한다:** 매니페스트의 `gambling/fx/gl/stage.ts` 동적 엔트리(`isDynamicEntry`)에서 `imports`만 따라간 폐포에서 엔트리 폐포를 뺀 것. 기준값 91KB(§4.2 실측). 110KB를 넘으면 경고를 출력한다(실패 아님. 금지한 Pixi 모듈이 들어왔다는 신호다).

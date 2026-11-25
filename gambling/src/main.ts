@@ -1,3 +1,5 @@
+/// <reference types="vite-plugin-pwa/client" />
+import { registerSW } from 'virtual:pwa-register';
 import { getLang, pickLang, setLang, LANG_STORAGE_KEY, type Lang } from '../../shared/i18n';
 import { t } from '../../shared/i18n.gambling';
 import { START_CREDITS } from '../../shared/config';
@@ -243,6 +245,7 @@ export function startPage(app: App): void {
 }
 
 if (typeof document !== 'undefined' && document.getElementById('app') && document.getElementById('frame')) {
+  registerSW({ immediate: false }); // a new worker applies on the next launch, never mid-session
   const app = boot();
   (globalThis as { __app?: App }).__app = app;
   startPage(app);

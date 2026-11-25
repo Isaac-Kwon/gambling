@@ -1,3 +1,5 @@
+/// <reference types="vite-plugin-pwa/client" />
+import { registerSW } from 'virtual:pwa-register';
 import './style.css';
 import { getLang, pickLang, setLang } from '@shared/i18n';
 import { t } from '@shared/i18n.understanding';
@@ -228,4 +230,5 @@ async function boot(): Promise<void> {
 }
 
 addEventListener('pagehide', () => sim.dispose());
+registerSW({ immediate: false }); // a new worker applies on the next launch, never mid-session
 void boot();
